@@ -1,6 +1,6 @@
 'use server'
 
-// Import biến prisma từ file db.ts vừa tạo
+// Import biến prisma từ file db.ts
 import { prisma } from './db'; 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
@@ -10,10 +10,20 @@ export async function getPlaybooks(query: string) {
     const playbooks = await prisma.playbook.findMany({
       where: {
         OR: [
+          // Tìm theo Tiêu đề
           { title: { contains: query, mode: 'insensitive' } },
+          // Tìm theo ID (PB-01)
           { playbookId: { contains: query, mode: 'insensitive' } },
+          // Tìm theo Kịch bản (Scenario)
           { scenario: { contains: query, mode: 'insensitive' } },
+          // Tìm theo Nhóm (Category)
           { category: { contains: query, mode: 'insensitive' } },
+          
+          // --- MỚI THÊM: Tìm theo MITRE ATT&CK (T1528...) ---
+          { mitre: { contains: query, mode: 'insensitive' } },
+          
+          // --- MỚI THÊM: Tìm theo Nguồn phát hiện (SIEM, EDR...) ---
+          { detection: { contains: query, mode: 'insensitive' } }
         ]
       },
       orderBy: { playbookId: 'asc' }
@@ -36,10 +46,11 @@ export async function getPlaybookById(id: string) {
     return null;
   }
 }
+
 export async function updatePlaybook(formData: FormData) {
   const id = formData.get('playbookId') as string;
   
-  // Lấy dữ liệu JSON từ form (Phần quy trình Phases)
+																
   const phasesRaw = formData.get('phases') as string;
   let phasesData = [];
   try {
@@ -66,15 +77,16 @@ export async function updatePlaybook(formData: FormData) {
     throw new Error("Failed to update playbook");
   }
 
-  // Xóa cache để Web hiển thị dữ liệu mới ngay lập tức
+																		 
   revalidatePath(`/playbook/${id}`);
   revalidatePath('/');
   
-  // Chuyển hướng về trang chi tiết
+											
   redirect(`/playbook/${id}`);
 }
+
 export async function createPlaybook(formData: FormData) {
-  // Lấy dữ liệu JSON từ form
+									 
   const phasesRaw = formData.get('phases') as string;
   let phasesData = [];
   try {
@@ -86,7 +98,7 @@ export async function createPlaybook(formData: FormData) {
   try {
     await prisma.playbook.create({
       data: {
-        playbookId: formData.get('playbookId') as string, // Ví dụ: PB-51
+        playbookId: formData.get('playbookId') as string,
         title: formData.get('title') as string,
         category: formData.get('category') as string,
         severity: formData.get('severity') as string,
