@@ -6,27 +6,48 @@ import { Save, X, PlusCircle } from 'lucide-react';
 import { useState } from 'react';
 
 export default function NewPlaybookPage() {
-  // Mẫu JSON mặc định để người dùng đỡ phải gõ từ đầu
+  
+  // --- MẪU TEMPLATE CHUẨN 6 BƯỚC (Dựa trên tài liệu SOC) ---
   const defaultPhases = [
     {
-      "phase": "Containment",
+      "phase": "1. Preparation (Pre-Incident Setup)",
       "steps": [
-        { "action": "Nhập hành động ngăn chặn...", "detail": "Chi tiết..." }
+        { "action": "Configure tools...", "detail": "Setup logging, alerts, and access controls." }
       ]
     },
     {
-      "phase": "Eradication",
+      "phase": "2. Detection & Analysis",
       "steps": [
-        { "action": "Nhập hành động diệt trừ...", "detail": "Chi tiết..." }
+        { "action": "Alert triggered", "detail": "Describe the trigger condition." },
+        { "action": "Analyze impact", "detail": "Determine scope and affected assets." }
       ]
     },
-     {
-      "phase": "Recovery",
+    {
+      "phase": "3. Containment",
       "steps": [
-        { "action": "Nhập hành động phục hồi...", "detail": "Chi tiết..." }
+        { "action": "Isolate system", "detail": "Block network access or suspend account." }
+      ]
+    },
+    {
+      "phase": "4. Eradication",
+      "steps": [
+        { "action": "Remove threat", "detail": "Delete malware, rogue accounts, or artifacts." }
+      ]
+    },
+    {
+      "phase": "5. Recovery",
+      "steps": [
+        { "action": "Restore service", "detail": "Recover from backup and validate integrity." }
+      ]
+    },
+    {
+      "phase": "6. Lessons Learned & Reporting",
+      "steps": [
+        { "action": "Conduct RCA", "detail": "Identify root cause and update policies." }
       ]
     }
   ];
+  // -------------------------------------------------------
 
   const [phasesJson, setPhasesJson] = useState(JSON.stringify(defaultPhases, null, 2));
 
@@ -101,7 +122,7 @@ export default function NewPlaybookPage() {
             <div className="space-y-4 bg-slate-900 p-6 rounded-xl border border-slate-800 flex flex-col">
               <div className="flex justify-between">
                 <h3 className="text-orange-400 font-bold">2. Quy trình xử lý (JSON)</h3>
-                <span className="text-xs text-slate-500 italic">Sửa nội dung trong ngoặc kép " "</span>
+                <span className="text-xs text-slate-500 italic">Điền nội dung vào các bước bên dưới</span>
               </div>
               
               <textarea 

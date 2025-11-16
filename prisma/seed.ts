@@ -9,12 +9,24 @@ async function main() {
   const rawData = fs.readFileSync(filePath, 'utf-8');
   const playbooks = JSON.parse(rawData);
 
-  console.log(`Dang nap ${playbooks.length} playbooks...`);
+  console.log(`🚀 Dang nap ${playbooks.length} playbooks...`);
 
   for (const pb of playbooks) {
     await prisma.playbook.upsert({
       where: { playbookId: pb.playbookId },
-      update: {},
+      
+      // --- SỬA Ở ĐÂY: CẬP NHẬT DỮ LIỆU KHI ĐÃ TỒN TẠI ---
+      update: {
+        title: pb.title,
+        category: pb.category,
+        severity: pb.severity,
+        scenario: pb.scenario,
+        detection: pb.detection,
+        mitre: pb.mitre,
+        phases: pb.phases // Quan trọng: Cập nhật JSON các bước
+      },
+      // --------------------------------------------------
+
       create: {
         playbookId: pb.playbookId,
         title: pb.title,
@@ -27,21 +39,22 @@ async function main() {
       }
     })
   }
-  console.log('✅ Nap du lieu thanh cong!');
-  // Tạo Admin mặc định
+  
+  // Phần tạo Admin giữ nguyên (đã chuẩn)
   const adminEmail = 'admin@soc.local';
   await prisma.user.upsert({
-  where: { email: adminEmail },
-  update: { // <--- Thêm dòng này để cập nhật mật khẩu mới
-    password: 'Soc@2025!' 
-  },
-  create: {
-    email: adminEmail,
-    password: 'Soc@2025!',
-    role: 'ADMIN'
-  }
-});
-  console.log('✅ Đã tạo Admin: admin@soc.local / Soc@2025!');
+    where: { email: adminEmail },
+																		  
+    update: { password: 'Soc@2025!' },
+	
+    create: {
+      email: adminEmail,
+      password: 'Soc@2025!',
+      role: 'ADMIN'
+    }
+  });
+  
+  console.log('✅ Nap du lieu thanh cong!');
 }
 
 main()
