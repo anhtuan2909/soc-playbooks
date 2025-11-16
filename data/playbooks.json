@@ -4,28 +4,64 @@
     "title": "Unauthorised SaaS OAuth Application Integration",
     "category": "Cloud Security",
     "severity": "High",
-    "scenario": "An employee or attacker grants a third-party application access to a corporate SaaS account using OAuth scopes (e.g., read email, access calendar). These applications may exfiltrate data or maintain persistent access without triggering standard alerts.",
+    "scenario": "An employee or attacker grants a third-party application access to a corporate SaaS account using OAuth scopes (e.g., read email, access calendar, read/write files). These applications may exfiltrate data, impersonate users or maintain persistent access without triggering standard credential or MFA alerts.",
     "detection": "CASB, SSPM, SaaS Admin Portals, SIEM, Threat Intelligence Feeds.",
     "mitre": "T1528 (Steal Access Token), T1550.001 (Application Access Token), T1098.003 (External Account).",
     "phases": [
       {
-        "phase": "Containment",
+        "phase": "1. Preparation (Pre-Incident Setup)",
         "steps": [
-          { "action": "Revoke app access immediately", "detail": "Via admin portal (e.g., Azure AD, Google Workspace)." },
-          { "action": "Suspend impacted user account", "detail": "If malicious behaviour or data leakage is confirmed." }
+          { "action": "Restrict app consent policies", "detail": "Only allow OAuth consent for pre-approved or verified apps." },
+          { "action": "Monitor OAuth activity logs", "detail": "Use SIEM or SaaS security tools to track app authorisations and scopes." },
+          { "action": "Educate users", "detail": "About risks of authorising personal or unknown apps in corporate environments." },
+          { "action": "Integrate SSPM/CASP tools", "detail": "For visibility into authorised applications and risk scoring." },
+          { "action": "Apply conditional access policies", "detail": "To limit app connections from unmanaged devices." }
         ]
       },
       {
-        "phase": "Eradication",
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Risky or unapproved OAuth app detected with elevated scopes (e.g., read mail, read drive, send messages)." },
+          { "action": "Identify user and application", "detail": "Who authorised it, what scopes were granted and what app was used." },
+          { "action": "Analyse access logs", "detail": "Check if app accessed sensitive data or performed actions (e.g., sending emails, downloading files)." },
+          { "action": "Review app metadata", "detail": "Reputation, risk score, domain registration, previous threat reports." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Revoke app access immediately", "detail": "Via admin portal (e.g., Azure AD, Google Workspace, Slack admin)." },
+          { "action": "Suspend impacted user account", "detail": "If malicious behaviour or data leakage is confirmed." },
+          { "action": "Block app domain or API endpoints", "detail": "Via firewall, CASB or DNS filter to prevent callback connections." },
+          { "action": "Notify user and security team", "detail": "Initiate internal investigation and containment measures." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
         "steps": [
           { "action": "Remove residual access tokens", "detail": "Revoke all tokens granted to the app and refresh user sessions." },
-          { "action": "Rotate credentials and MFA", "detail": "If impersonation or token theft is suspected." }
+          { "action": "Rotate credentials and MFA", "detail": "If impersonation or token theft is suspected." },
+          { "action": "Conduct full data access review", "detail": "Determine what the app had access to and if data was exfiltrated." },
+          { "action": "Update OAuth policy", "detail": "Add the app to a blocklist or blacklist category in SSPM or CASB." }
         ]
       },
       {
-        "phase": "Recovery",
+        "phase": "5. Recovery",
         "steps": [
-          { "action": "Apply stricter app review process", "detail": "Require internal approval for all new app integrations." }
+          { "action": "Reinstate user access with monitoring", "detail": "Ensure user awareness and endpoint clean-up if malware is linked." },
+          { "action": "Apply stricter app review process", "detail": "Require internal approval for all new app integrations." },
+          { "action": "Monitor for recurrence", "detail": "Create detections for similar app authorisation patterns or behaviours." },
+          { "action": "Validate SaaS logs and alerts", "detail": "Ensure full visibility of high-risk OAuth events." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Complete root cause analysis", "detail": "Why was the app authorised? Was it phishing, ignorance or bypassed control?" },
+          { "action": "Improve user training", "detail": "On secure SaaS usage and application access warnings." },
+          { "action": "Strengthen OAuth governance", "detail": "Integrate SSPM and automate risk-based app approval/revocation." },
+          { "action": "Document the incident", "detail": "For compliance, audit trails and policy updates." },
+          { "action": "Notify affected parties or regulators", "detail": "If customer data or sensitive records were accessed." }
         ]
       }
     ]
@@ -35,22 +71,64 @@
     "title": "CI/CD Supply Chain Poisoning via Compromised Base Images",
     "category": "DevSecOps",
     "severity": "Critical",
-    "scenario": "A developer or CI/CD system pulls a malicious or backdoored container base image from public repositories. This tainted image may contain cryptominers or reverse shells affecting production.",
-    "detection": "CI/CD Logs, Artifact Scanners, CSPM, Image Scanners (Trivy, Grype).",
-    "mitre": "T1195.002 (Compromise Software Supply Chain), T1204.003 (Malicious File).",
+    "scenario": "A developer or CI/CD system pulls a malicious or backdoored container base image (e.g., from Docker Hub, GitHub Packages, public artifact repositories) into a pipeline. This tainted image may contain cryptominers, reverse shells or logic bombs that affect build environments or production deployments.",
+    "detection": "CI/CD Logs, Artifact Scanners, CSPM, EDR, Threat Intelligence, Image Scanners (e.g., Trivy, Grype).",
+    "mitre": "T1195.002 (Compromise Software Supply Chain), T1204.003 (Malicious File), T1105 (Ingress Tool Transfer).",
     "phases": [
       {
-        "phase": "Containment",
+        "phase": "1. Preparation (Pre-Incident Setup)",
         "steps": [
-          { "action": "Block further pulls", "detail": "Remove access from all pipelines and registries." },
-          { "action": "Disable affected pipelines", "detail": "Temporarily stop build/deploy operations." }
+          { "action": "Use trusted internal image registries", "detail": "Prevent use of unknown or unauthorised public images." },
+          { "action": "Scan all base images automatically", "detail": "Use tools like Trivy, Grype, Aqua or Clair in CI pipelines." },
+          { "action": "Maintain SBOM for all builds", "detail": "Link image layers to dependency origins for traceability." },
+          { "action": "Sign and verify container images", "detail": "Use Cosign, Notary v2 or Sigstore for image integrity verification." },
+          { "action": "Apply egress restrictions on runners", "detail": "Prevent containers from initiating outbound connections by default." }
         ]
       },
       {
-        "phase": "Eradication",
+        "phase": "2. Detection & Analysis",
         "steps": [
-          { "action": "Replace image", "detail": "Rebuild services using a verified clean base image." },
-          { "action": "Rotate secrets", "detail": "If compromised image had access to env variables/keys." }
+          { "action": "Alert triggered", "detail": "CI pipeline or image scanner detects malicious binary, network beaconing or unexpected process in base image." },
+          { "action": "Identify affected pipelines or builds", "detail": "Trace which projects, services or environments used the image." },
+          { "action": "Analyse behaviour of container", "detail": "Review runtime logs, network connections, system modifications." },
+          { "action": "Cross-reference with threat intel", "detail": "Check for known IOCs, CVEs or reported backdoored images." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Block further pulls of the compromised image", "detail": "Remove access from all pipelines and registries." },
+          { "action": "Disable affected pipelines or environments", "detail": "Temporarily stop build and deploy operations for impacted apps." },
+          { "action": "Revoke image caching", "detail": "Remove local copies of tainted images from runners and registries." },
+          { "action": "Notify DevOps, Security and App Owners", "detail": "Coordinate immediate response actions." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Replace image with a trusted base", "detail": "Rebuild services using a verified clean base image." },
+          { "action": "Remove backdoors or injected tools", "detail": "If deployed into test/staging/production, scan and clean infected containers." },
+          { "action": "Update pipeline definitions", "detail": "Reference only signed and vetted base images going forward." },
+          { "action": "Rotate secrets and tokens", "detail": "If compromised image had access to environment variables, keys or APIs." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Resume clean builds and deploys", "detail": "After validation of base image security and CI/CD pipeline integrity." },
+          { "action": "Validate systems that used the image", "detail": "Ensure no persistence mechanisms or lateral movement occurred." },
+          { "action": "Monitor for callback traffic", "detail": "From prior deployments using the malicious image." },
+          { "action": "Restore from clean backups", "detail": "If persistent changes or damage was detected." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Where was the malicious image introduced? How was it authorised?" },
+          { "action": "Improve CI/CD governance", "detail": "Enforce image signing, SBOM validation and approval workflows." },
+          { "action": "Train development teams", "detail": "On image provenance, trust boundaries and secure Dockerfile practices." },
+          { "action": "Document incident", "detail": "Include timelines, IOCs and preventive controls taken." },
+          { "action": "Notify stakeholders or regulators", "detail": "If breach involves sensitive data or production services." }
         ]
       }
     ]
@@ -60,21 +138,64 @@
     "title": "Privilege Escalation via Misconfigured Cloud IAM Roles",
     "category": "Cloud Security",
     "severity": "Critical",
-    "scenario": "An attacker identifies and exploits misconfigured IAM roles or trust relationships in cloud platforms (AWS, Azure, GCP) to escalate privileges.",
-    "detection": "CSPM, SIEM, Cloud Logs (CloudTrail, Azure Activity), Identity Analytics.",
-    "mitre": "T1078.004 (Cloud Accounts), T1484.002 (Domain Trust Abuse).",
+    "scenario": "An attacker (external or insider) identifies and exploits misconfigured IAM roles, policies or trust relationships in cloud platforms (e.g., AWS, Azure, GCP) to escalate privileges. This can include lateral movement from a low-privilege identity to admin or service account roles, enabling full control over cloud resources.",
+    "detection": "CSPM, SIEM, Cloud Logs (e.g., CloudTrail, Azure Activity Logs), Identity Analytics, EDR/XDR.",
+    "mitre": "T1078.004 (Cloud Accounts), T1484.002 (Domain Trust Abuse), T1550.002 (Use of Cloud Instance Metadata API).",
     "phases": [
       {
-        "phase": "Containment",
+        "phase": "1. Preparation (Pre-Incident Setup)",
         "steps": [
-          { "action": "Disable affected roles", "detail": "Remove misconfigured trust relationships." },
-          { "action": "Revoke temporary credentials", "detail": "Invalidate session tokens or access keys." }
+          { "action": "Enforce least privilege across IAM", "detail": "Avoid wildcard * permissions, unused role chaining and overly permissive trust policies." },
+          { "action": "Enable identity logging", "detail": "Capture all role assumption events, token usage and privilege escalations." },
+          { "action": "Use CSPM and IAM analyzers", "detail": "Continuously scan for excessive permissions, unused roles or risky privilege paths." },
+          { "action": "Segment high-privilege roles", "detail": "Prevent broad access from service accounts or low-trust identities." },
+          { "action": "Apply multi-factor authentication", "detail": "To all privileged user accounts." }
         ]
       },
       {
-        "phase": "Eradication",
+        "phase": "2. Detection & Analysis",
         "steps": [
-          { "action": "Fix IAM misconfigurations", "detail": "Remove over-permissive roles and tighten policies." }
+          { "action": "Alert triggered", "detail": "Suspicious use of AssumeRole, token escalation or sudden privilege increase." },
+          { "action": "Identify the source user or process", "detail": "Determine the original identity and method used (CLI, API, web console)." },
+          { "action": "Trace the escalation path", "detail": "Map the IAM policy or trust chain that allowed the privilege elevation." },
+          { "action": "Correlate with resource activity", "detail": "Look for high-privilege actions post-escalation (e.g., key export, instance creation)." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Disable affected IAM roles or policies", "detail": "Immediately remove or update misconfigured trust relationships." },
+          { "action": "Revoke temporary credentials", "detail": "Invalidate session tokens or access keys that were abused." },
+          { "action": "Limit service account access", "detail": "If automation or machine identity was used for escalation." },
+          { "action": "Notify cloud admin and security team", "detail": "Coordinate rapid containment and remediation." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Audit and fix IAM misconfigurations", "detail": "Remove over-permissive or unused roles and tighten trust policies." },
+          { "action": "Rotate all potentially exposed credentials", "detail": "Especially for accounts with escalation access." },
+          { "action": "Validate cloud infrastructure integrity", "detail": "Look for signs of tampering, persistence or lateral movement." },
+          { "action": "Review identity federation settings", "detail": "Ensure external IDPs or linked identities follow least privilege." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore normal IAM role mappings", "detail": "After fixing misconfigurations and confirming safe usage." },
+          { "action": "Re-enable workflows and automation", "detail": "With updated permission boundaries and monitoring rules." },
+          { "action": "Monitor activity of affected identities", "detail": "Apply anomaly detection for the next 30 days." },
+          { "action": "Apply tagging for sensitive roles", "detail": "To enforce stricter review and approval processes." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Determine how the escalation path was missed during design or review." },
+          { "action": "Improve IAM review processes", "detail": "Regular audits, change approvals and detection rules." },
+          { "action": "Train cloud teams", "detail": "On identity-based attack chains and permission boundaries." },
+          { "action": "Update IAM policy templates", "detail": "Enforce secure defaults and review workflows in Infrastructure-as-Code." },
+          { "action": "Report incident", "detail": "If it led to data exposure or regulatory risk (e.g., PDPA, ISO 27001)." }
         ]
       }
     ]
@@ -84,21 +205,64 @@
     "title": "Third-Party Vendor Compromise",
     "category": "Supply Chain",
     "severity": "Critical",
-    "scenario": "A breach occurs within a vendor's environment that has direct access (VPN, API) to the organisation. Attacker leverages this trust to move laterally.",
-    "detection": "SIEM, Threat Intel, Vendor Notification, Identity Logs.",
-    "mitre": "T1195.002 (Compromise Software Supply Chain), T1133 (External Remote Services).",
+    "scenario": "A security breach or malware infection occurs within a third-party vendor's environment that has direct or indirect access to the organisation's systems (e.g., via VPN, API, shared cloud environment, email communication or integration platform). The attacker may leverage this trust relationship to move laterally, steal data or deliver malicious payloads.",
+    "detection": "SIEM, Threat Intel Feeds, EDR, Identity Logs, Email Security, External Disclosure (e.g., vendor notification).",
+    "mitre": "T1195.002 (Compromise Software Supply Chain), T1133 (External Remote Services), T1203 (Exploitation of Remote Services).",
     "phases": [
       {
-        "phase": "Containment",
+        "phase": "1. Preparation (Pre-Incident Setup)",
         "steps": [
-          { "action": "Disable vendor access", "detail": "Suspend VPN, API keys, and federated accounts." },
-          { "action": "Block suspicious IPs", "detail": "If access originated from known malicious infrastructure." }
+          { "action": "Maintain third-party risk registry", "detail": "Identify and rank vendors by access level and criticality." },
+          { "action": "Use network segmentation and Zero Trust", "detail": "Minimise vendor access scope." },
+          { "action": "Monitor vendor accounts and integration logs", "detail": "Include API usage, VPN activity, email metadata and file sharing logs." },
+          { "action": "Enforce strict onboarding and offboarding", "detail": "Review access regularly and revoke unused integrations or accounts." },
+          { "action": "Establish incident response SLAs", "detail": "Include third-party reporting requirements in contracts." }
         ]
       },
       {
-        "phase": "Eradication",
+        "phase": "2. Detection & Analysis",
         "steps": [
-          { "action": "Rotate shared credentials", "detail": "Reset API keys and passwords used by the vendor." }
+          { "action": "Alert triggered", "detail": "Suspicious activity tied to vendor-controlled assets (e.g., VPN session, API call, email with malware)." },
+          { "action": "Verify vendor access channels", "detail": "Identify methods of access (VPN, API, SSH, SaaS integration) and their current usage." },
+          { "action": "Correlate with internal indicators", "detail": "Determine if lateral movement or data access occurred through the vendor's access." },
+          { "action": "Engage with vendor SOC or security team", "detail": "Confirm breach details, timeline, IOCs and scope." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Disable vendor access temporarily", "detail": "VPN, API keys, user accounts, shared drives or federated identity." },
+          { "action": "Block suspicious IPs or tokens", "detail": "If access originated from known malicious infrastructure." },
+          { "action": "Isolate any impacted internal systems", "detail": "That were accessed or touched via vendor communication." },
+          { "action": "Preserve and collect logs", "detail": "Related to vendor access and internal system interaction." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove any malware or rogue code", "detail": "Delivered through compromised vendor access or email." },
+          { "action": "Rotate credentials used by the vendor", "detail": "API keys, shared passwords, certificates or OAuth tokens." },
+          { "action": "Patch exposed services or integrations", "detail": "That may have been used for lateral access." },
+          { "action": "Invalidate existing sessions", "detail": "Related to the vendor's access." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Re-enable vendor access (if safe)", "detail": "Only after vendor confirms full containment on their side." },
+          { "action": "Apply enhanced monitoring", "detail": "For high-risk vendor accounts for at least 30 days." },
+          { "action": "Validate integrity of impacted systems", "detail": "Check for configuration changes or backdoors." },
+          { "action": "Resume operations", "detail": "After full internal and vendor clearance." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Understand entry point, detection delay and lateral movement path." },
+          { "action": "Reassess vendor risk and trust level", "detail": "Update risk registry and access privileges accordingly." },
+          { "action": "Update contractual security clauses", "detail": "If SLA, breach notification or audit rights were insufficient." },
+          { "action": "Share IOCs and findings", "detail": "Internally and with threat intel platforms if necessary." },
+          { "action": "Report to regulators or clients", "detail": "If customer data or systems were impacted." }
         ]
       }
     ]
@@ -108,473 +272,66 @@
     "title": "API Abuse by Compromised Automation Scripts",
     "category": "DevSecOps",
     "severity": "Critical",
-    "scenario": "Attacker gains access to API keys embedded in automation scripts or CI/CD files. These secrets are exploited to perform unauthorised actions.",
-    "detection": "API Gateway Logs, SIEM, WAF, Secret Scanners.",
-    "mitre": "T1528 (Steal Access Token), T1552.001 (Credentials in Files).",
+    "scenario": "An attacker gains access to API keys or tokens used in automation scripts, build pipelines or cloud jobs. These secrets may be embedded in code, environment variables or CI/CD configuration files and can be exploited to perform unauthorised actions through APIs (e.g., data access, deletion, privilege abuse).",
+    "detection": "SIEM, Cloud Logs, WAF, API Gateway Logs, CI/CD Logs, Secret Scanners.",
+    "mitre": "T1528 (Steal Access Token), T1110.003 (Brute Force: Password Spraying), T1552.001 (Credentials in Files).",
     "phases": [
       {
-        "phase": "Containment",
+        "phase": "1. Preparation (Pre-Incident Setup)",
         "steps": [
-          { "action": "Revoke API key", "detail": "Immediately invalidate the compromised token." },
-          { "action": "Disable affected script", "detail": "Stop the automation job to prevent reuse." }
+          { "action": "Store secrets securely", "detail": "Use vaults (e.g., HashiCorp Vault, AWS Secrets Manager) instead of hardcoding." },
+          { "action": "Rotate API tokens regularly", "detail": "Enforce TTLs for short-lived tokens and automate rotation." },
+          { "action": "Monitor API usage per key", "detail": "Implement granular logging and usage monitoring for each token." },
+          { "action": "Scan repositories and pipelines", "detail": "Use tools like TruffleHog, Gitleaks, GitGuardian to detect exposed secrets." },
+          { "action": "Apply rate limits and scope restrictions", "detail": "Minimise token abuse impact by scoping API keys to specific actions." }
         ]
       },
       {
-        "phase": "Eradication",
+        "phase": "2. Detection & Analysis",
         "steps": [
-          { "action": "Clean secrets from code", "detail": "Purge commits with secrets from Git history." }
+          { "action": "Alert triggered", "detail": "Abnormal API call pattern, burst traffic, data deletion or external access from automation token." },
+          { "action": "Identify token and script source", "detail": "Trace which job, service or script the compromised API key belongs to." },
+          { "action": "Review recent script changes", "detail": "Look for unauthorised modifications, token theft or external syncs." },
+          { "action": "Correlate with access logs", "detail": "Determine what data or systems were accessed or modified using the token." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Immediately revoke the compromised API key", "detail": "At the platform or application level." },
+          { "action": "Disable the affected script or job", "detail": "To prevent further use until secured." },
+          { "action": "Block attacker IPs or sessions", "detail": "If abuse came from external networks." },
+          { "action": "Isolate affected service account", "detail": "And audit all associated activities and permissions." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Replace compromised tokens", "detail": "Generate new tokens and store them securely in a vault." },
+          { "action": "Clean exposed secrets from codebase", "detail": "Purge commits with secrets from Git history (e.g., using BFG or git filter-branch)." },
+          { "action": "Strengthen CI/CD secrets handling", "detail": "Enforce secret injection via secure variables instead of plaintext." },
+          { "action": "Patch any exploited systems or APIs", "detail": "If abuse exploited a logic flaw or misconfiguration." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Resume secure automation jobs", "detail": "After validation and secret reconfiguration." },
+          { "action": "Monitor post-incident API usage", "detail": "Track token replacements for abnormal behaviour." },
+          { "action": "Verify system state and data integrity", "detail": "Check for unauthorised changes or corruptions due to API abuse." },
+          { "action": "Validate all tokens and credentials", "detail": "In the affected namespace, repository or environment." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "How was the token exposed? What changes are needed in DevOps practices?" },
+          { "action": "Update secure coding policies", "detail": "Include rules on secret storage, access scopes and Git hygiene." },
+          { "action": "Train developers and DevOps", "detail": "On secure secret handling and pipeline hardening." },
+          { "action": "Update API abuse detection rules", "detail": "In SIEM, WAF and API gateways." },
+          { "action": "Notify stakeholders or clients", "detail": "If the abuse led to data exfiltration or business impact." }
         ]
       }
     ]
-  },
-  {
-    "playbookId": "PB-06",
-    "title": "Persistent Access via Cloud Backdoor Accounts",
-    "category": "Cloud Security",
-    "severity": "Critical",
-    "scenario": "Attacker creates hidden IAM users or service accounts to maintain persistence after initial compromise.",
-    "detection": "Cloud Audit Logs, CSPM, Identity Governance.",
-    "mitre": "T1098 (Account Manipulation), T1078.004 (Cloud Accounts)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-07",
-    "title": "Unauthorised Access via Misconfigured Reverse Proxies",
-    "category": "Network Security",
-    "severity": "High",
-    "scenario": "Attacker exploits misconfigured proxy (Nginx, HAProxy) to bypass auth or access internal APIs.",
-    "detection": "WAF Logs, Reverse Proxy Logs, SIEM.",
-    "mitre": "T1133 (External Remote Services), T1190 (Exploit Public-Facing Application)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-08",
-    "title": "Man-in-the-Middle (MitM) in Hybrid Environments",
-    "category": "Network Security",
-    "severity": "Critical",
-    "scenario": "Attacker intercepts traffic between endpoints and backend systems via rogue Wi-Fi, DNS spoofing or compromised edge devices.",
-    "detection": "NDR, EDR, DNS Logs, TLS Fingerprinting.",
-    "mitre": "T1557 (MitM), T1040 (Network Sniffing)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-09",
-    "title": "Session Hijacking via Token Replay",
-    "category": "Identity Security",
-    "severity": "High",
-    "scenario": "Attacker captures and reuses a valid session token (JWT, OAuth, Cookie) to impersonate a user.",
-    "detection": "SIEM, CASB, Cloud Logs, Browser Telemetry.",
-    "mitre": "T1539 (Steal Web Session Cookie), T1550.004 (Token Replay)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-10",
-    "title": "Lateral Movement via Federated Identity",
-    "category": "Identity Security",
-    "severity": "Critical",
-    "scenario": "Attacker compromises a SaaS account and uses identity federation (SAML/OAuth) to pivot to on-prem resources.",
-    "detection": "Identity Logs (Okta, Azure AD), VPN Logs, SIEM.",
-    "mitre": "T1550.002 (Use of Cloud Identity Federation)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-11",
-    "title": "Data Exfiltration via Encrypted DNS Tunnels (DoH/DoT)",
-    "category": "Network Security",
-    "severity": "High",
-    "scenario": "Attacker uses DoH or DoT to create a covert channel for C2 or exfiltration, bypassing traditional DNS monitoring.",
-    "detection": "NDR, JA3 Fingerprinting, DNS Proxy Logs.",
-    "mitre": "T1071.004 (DNS), T1048 (Exfiltration Over Alternative Protocol)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-12",
-    "title": "Business Email Compromise via OAuth App Abuse",
-    "category": "Identity Security",
-    "severity": "Critical",
-    "scenario": "Attacker tricks user into authorising a malicious OAuth app to read/send email, bypassing MFA.",
-    "detection": "Mail Audit Logs, CASB, Identity Logs.",
-    "mitre": "T1550.001 (App Access Token), T1566 (Phishing)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-13",
-    "title": "Destructive Malware in Hybrid AD Environments",
-    "category": "Endpoint Security",
-    "severity": "Critical",
-    "scenario": "Wiper or ransomware impacts both on-prem AD and Cloud AD, targeting Domain Controllers.",
-    "detection": "EDR, SIEM, DC Logs, Backup Alerts.",
-    "mitre": "T1485 (Data Destruction), T1486 (Data Encrypted for Impact)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-14",
-    "title": "Ransomware Targeting Cloud Storage Buckets",
-    "category": "Cloud Security",
-    "severity": "Critical",
-    "scenario": "Attacker accesses cloud buckets (S3, Blob) and encrypts or deletes objects using compromised keys.",
-    "detection": "CloudTrail, Storage Logs, CSPM.",
-    "mitre": "T1486 (Data Encrypted for Impact), T1530 (Data from Cloud Storage)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-15",
-    "title": "Insider Data Theft via Unmanaged Personal Cloud Apps",
-    "category": "Insider Threat",
-    "severity": "High",
-    "scenario": "Employee uploads sensitive files to personal cloud storage (Drive, Dropbox) via browser or sync client.",
-    "detection": "CASB, DLP, Proxy Logs, EDR.",
-    "mitre": "T1567 (Exfiltration Over Web Service), T1041 (Exfiltration C2)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-16",
-    "title": "Supply Chain Compromise via Third-Party Software Updates",
-    "category": "Supply Chain",
-    "severity": "Critical",
-    "scenario": "Trusted vendor is compromised; malicious code is injected into legitimate software updates pushed to endpoints.",
-    "detection": "EDR, Threat Intel, File Integrity Monitoring.",
-    "mitre": "T1195.002 (Compromise Software Supply Chain)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-17",
-    "title": "Malware-Laced PDF Uploads to Public Portals",
-    "category": "Endpoint Security",
-    "severity": "High",
-    "scenario": "Attacker uploads PDF with malware (macro/JS) to public portal; staff opens it, triggering compromise.",
-    "detection": "WAF, EDR, Sandbox, AV.",
-    "mitre": "T1203 (Exploitation for Client Execution), T1059 (Command Execution)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-18",
-    "title": "Account Takeover via Legacy Authentication Protocols",
-    "category": "Identity Security",
-    "severity": "High",
-    "scenario": "Attacker uses brute force or credential stuffing on legacy protocols (IMAP, POP3, SMTP) to bypass MFA.",
-    "detection": "IdP Sign-in Logs (Azure AD), SIEM.",
-    "mitre": "T1110 (Brute Force), T1078 (Valid Accounts)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-19",
-    "title": "Data Tampering in Business-Critical Databases",
-    "category": "Data Security",
-    "severity": "High",
-    "scenario": "Privileged insider or attacker modifies/deletes data in critical DBs (ERP, CRM) without authorisation.",
-    "detection": "DAM (Database Activity Monitoring), SIEM, Audit Logs.",
-    "mitre": "T1565 (Data Manipulation)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-20",
-    "title": "DNS-Based C2 from Embedded IoT Devices",
-    "category": "IoT Security",
-    "severity": "High",
-    "scenario": "Compromised IoT device uses DNS tunnelling for C2 communication to evade firewall rules.",
-    "detection": "NDR, DNS Logs, IoT Security Platform.",
-    "mitre": "T1071.004 (DNS), T1020 (Automated Exfiltration)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-21",
-    "title": "Initial Access via Malicious Browser Extensions",
-    "category": "Endpoint Security",
-    "severity": "High",
-    "scenario": "User installs malicious extension that steals cookies/tokens or redirects traffic.",
-    "detection": "Browser Management, EDR, CASB.",
-    "mitre": "T1176 (Browser Extensions)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-22",
-    "title": "Unauthorised Use of Offensive Security Tools",
-    "category": "Endpoint Security",
-    "severity": "Critical",
-    "scenario": "Detection of tools like Mimikatz, Cobalt Strike, or BloodHound running in the internal network.",
-    "detection": "EDR, Sysmon, Process Monitoring.",
-    "mitre": "T1003 (Credential Dumping), T1059 (Command Execution)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-23",
-    "title": "Lateral Movement via Shared Cloud Drives",
-    "category": "Cloud Security",
-    "severity": "High",
-    "scenario": "Attacker uses shared cloud folders (OneDrive/Google Drive) to distribute malware or links internally.",
-    "detection": "CASB, Cloud Audit Logs, Email Gateway.",
-    "mitre": "T1560 (Archive Collected Data), T1537",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-24",
-    "title": "Compromise via Misconfigured SaaS Integrations",
-    "category": "Cloud Security",
-    "severity": "High",
-    "scenario": "Attacker exploits unvetted SaaS integrations to access data or bypass MFA.",
-    "detection": "SSPM, CASB, OAuth Logs.",
-    "mitre": "T1550.001 (App Access Token), T1098 (Account Manipulation)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-25",
-    "title": "Privilege Escalation via Vulnerable Drivers",
-    "category": "Endpoint Security",
-    "severity": "Critical",
-    "scenario": "Attacker loads a vulnerable signed driver (BYOVD) to exploit kernel and bypass EDR.",
-    "detection": "EDR, Sysmon (Event ID 6), SIEM.",
-    "mitre": "T1068 (Privilege Escalation), T1543 (Create System Process)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-26",
-    "title": "Data Exposure via Misconfigured Cloud Storage",
-    "category": "Cloud Security",
-    "severity": "High",
-    "scenario": "Cloud bucket (S3/Blob) misconfigured to public access, exposing sensitive PII or backups.",
-    "detection": "CSPM, CASB, Threat Intel.",
-    "mitre": "T1530 (Data from Cloud Storage)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-27",
-    "title": "Insider Abuse of Monitoring or Admin Tools",
-    "category": "Insider Threat",
-    "severity": "High",
-    "scenario": "Admin misuses legitimate tools (Splunk, SCCM) to view sensitive data or disable logging.",
-    "detection": "PAM Logs, UEBA, SIEM.",
-    "mitre": "T1078 (Valid Accounts), T1003 (Credential Dumping)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-28",
-    "title": "Backdoor Persistence via Rogue Browser Update",
-    "category": "Endpoint Security",
-    "severity": "High",
-    "scenario": "User tricked into installing fake browser update which installs a backdoor or RAT.",
-    "detection": "EDR, DNS Logs, Proxy Logs.",
-    "mitre": "T1189 (Drive-by Compromise), T1547 (Persistence)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-29",
-    "title": "Token Theft via Cross-Site Scripting (XSS)",
-    "category": "AppSec",
-    "severity": "High",
-    "scenario": "Attacker exploits XSS to steal session cookies or OAuth tokens from users.",
-    "detection": "WAF, SIEM, Browser Telemetry.",
-    "mitre": "T1185 (Browser Session Hijacking), T1557",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-30",
-    "title": "Remote Desktop Exposure via Misconfigured Firewall/NAT",
-    "category": "Network Security",
-    "severity": "High",
-    "scenario": "RDP/SSH exposed to internet via firewall misconfiguration, leading to brute force attacks.",
-    "detection": "Shodan, Firewall Logs, SIEM.",
-    "mitre": "T1133 (External Remote Services), T1110 (Brute Force)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-31",
-    "title": "Business Email Compromise via OAuth Token Abuse",
-    "category": "Identity Security",
-    "severity": "High",
-    "scenario": "Variant of PB-12: Attacker uses stolen token to access mailbox without credential theft.",
-    "detection": "Identity Logs, CASB, Mail Audit Logs.",
-    "mitre": "T1550.001 (App Access Token)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-32",
-    "title": "Data Exfiltration via DNS Tunnelling",
-    "category": "Network Security",
-    "severity": "Critical",
-    "scenario": "Data exfiltration via encoded DNS queries (long subdomains) to attacker-controlled resolver.",
-    "detection": "NDR, DNS Logs, SIEM.",
-    "mitre": "T1048 (Exfil Over Alternative Protocol), T1071.004 (DNS)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-33",
-    "title": "Compromise Through Vulnerable Open-Source Components",
-    "category": "AppSec",
-    "severity": "Critical",
-    "scenario": "Exploitation of known vulnerabilities (e.g., Log4j) in web apps to execute code.",
-    "detection": "WAF, SCA, RASP, SIEM.",
-    "mitre": "T1190 (Exploit Public-Facing Application)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-34",
-    "title": "Command and Control via Cloud Storage Platforms",
-    "category": "Network Security",
-    "severity": "High",
-    "scenario": "Malware uses Dropbox/Drive for C2 instructions to blend with normal traffic.",
-    "detection": "Proxy Logs, CASB, NDR.",
-    "mitre": "T1102 (Web Service C2), T1567",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-35",
-    "title": "Persistence Through Malicious Browser Extensions",
-    "category": "Endpoint Security",
-    "severity": "High",
-    "scenario": "Malicious extension installed to maintain access and steal data over time.",
-    "detection": "EDR, Browser Logs.",
-    "mitre": "T1176 (Browser Extensions)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-36",
-    "title": "Ransomware via Third-Party Vendor Compromise",
-    "category": "Supply Chain",
-    "severity": "Critical",
-    "scenario": "MSP or vendor compromised, leading to ransomware deployment via trusted RMM/VPN.",
-    "detection": "EDR, Backup Alerts, SIEM.",
-    "mitre": "T1195 (Supply Chain), T1486 (Ransomware)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-37",
-    "title": "Secrets Leakage Through Public Git Repositories",
-    "category": "DevSecOps",
-    "severity": "High",
-    "scenario": "Developer commits API keys/secrets to public Git, leading to cloud compromise.",
-    "detection": "Git Scanners (TruffleHog), Threat Intel.",
-    "mitre": "T1552.001 (Credentials in Files)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-38",
-    "title": "Privilege Escalation via Unpatched Endpoint Software",
-    "category": "Endpoint Security",
-    "severity": "High",
-    "scenario": "Attacker exploits unpatched local vulnerability (LPE) to gain System privileges.",
-    "detection": "EDR, Vuln Scanners.",
-    "mitre": "T1068 (Privilege Escalation)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-39",
-    "title": "Lateral Movement via Service Account Abuse",
-    "category": "Identity Security",
-    "severity": "Critical",
-    "scenario": "Compromised service account credentials used to move laterally across servers.",
-    "detection": "SIEM, UEBA, AD Logs.",
-    "mitre": "T1078 (Valid Accounts), T1021 (Remote Services)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-40",
-    "title": "Initial Access via Phishing with Malicious Macros",
-    "category": "Endpoint Security",
-    "severity": "High",
-    "scenario": "Phishing email with macro-enabled attachment executes malware (e.g., Emotet).",
-    "detection": "Email Gateway, EDR.",
-    "mitre": "T1566.001 (Phishing Attachment), T1059 (Command Execution)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-41",
-    "title": "Cloud Credential Theft from Exposed Config Files",
-    "category": "Cloud Security",
-    "severity": "Critical",
-    "scenario": "Cloud keys left in exposed config files on web servers or shares.",
-    "detection": "CloudTrail, Git Scanners, EDR.",
-    "mitre": "T1552 (Credentials in Files), T1078",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-42",
-    "title": "Data Exfiltration via Misconfigured S3 Buckets",
-    "category": "Cloud Security",
-    "severity": "Critical",
-    "scenario": "S3 bucket set to public allows attacker to download massive datasets.",
-    "detection": "CSPM, CloudTrail, Threat Intel.",
-    "mitre": "T1530 (Data from Cloud Storage)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-43",
-    "title": "Unauthorised VPN Access from Reused Credentials",
-    "category": "Network Security",
-    "severity": "High",
-    "scenario": "Attacker uses valid credentials (from breach/reuse) to login to VPN.",
-    "detection": "VPN Logs, UEBA, Identity Protection.",
-    "mitre": "T1078 (Valid Accounts), T1133",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-44",
-    "title": "Initial Access via Rogue IoT Devices",
-    "category": "IoT Security",
-    "severity": "High",
-    "scenario": "Rogue IoT device connected to physical network to scan and attack internally.",
-    "detection": "NAC, NDR, Switch Logs.",
-    "mitre": "T1200 (Hardware Additions)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-45",
-    "title": "Unauthorised Cloud Admin Role Escalation",
-    "category": "Cloud Security",
-    "severity": "Critical",
-    "scenario": "Attacker exploits IAM policies to assume high-privilege Admin roles.",
-    "detection": "CloudTrail, Azure Logs, CSPM.",
-    "mitre": "T1098 (Account Manipulation), T1078",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-46",
-    "title": "Data Exfiltration via Cloud Sync Abuse",
-    "category": "Data Security",
-    "severity": "High",
-    "scenario": "Insider syncs corporate data to personal cloud (OneDrive/Dropbox) via client.",
-    "detection": "CASB, DLP, Endpoint Logs.",
-    "mitre": "T1567 (Exfil Over Web Service)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-47",
-    "title": "Initial Access via OAuth Token Abuse (Browser Session Hijacking)",
-    "category": "Identity Security",
-    "severity": "High",
-    "scenario": "Attacker steals browser session cookie to bypass MFA and access OAuth apps.",
-    "detection": "IdP Logs, EDR, CASB.",
-    "mitre": "T1550.001 (Session Cookie), T1185",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-48",
-    "title": "Persistence via Cloud Workload Implants",
-    "category": "Cloud Security",
-    "severity": "High",
-    "scenario": "Attacker implants malicious code into Serverless functions (Lambda/Azure Functions).",
-    "detection": "Cloud Logs, CSPM, Source Code Logs.",
-    "mitre": "T1059 (Command Execution), T1546",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-49",
-    "title": "Command-and-Control via Trusted Third-Party APIs",
-    "category": "Network Security",
-    "severity": "High",
-    "scenario": "Attacker uses Slack/Telegram/Google Sheets APIs for C2 traffic.",
-    "detection": "EDR, NDR, Proxy Logs.",
-    "mitre": "T1102 (Web Service C2)",
-    "phases": []
-  },
-  {
-    "playbookId": "PB-50",
-    "title": "Privilege Escalation Through SaaS Misconfigurations",
-    "category": "Cloud Security",
-    "severity": "High",
-    "scenario": "Exploiting SaaS settings (e.g., delegated admin) to gain unauthorised privileges.",
-    "detection": "SSPM, Admin Audit Logs.",
-    "mitre": "T1068 (Privilege Escalation)",
-    "phases": []
   }
 ]
