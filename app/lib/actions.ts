@@ -73,3 +73,34 @@ export async function updatePlaybook(formData: FormData) {
   // Chuyển hướng về trang chi tiết
   redirect(`/playbook/${id}`);
 }
+export async function createPlaybook(formData: FormData) {
+  // Lấy dữ liệu JSON từ form
+  const phasesRaw = formData.get('phases') as string;
+  let phasesData = [];
+  try {
+    phasesData = JSON.parse(phasesRaw);
+  } catch (e) {
+    throw new Error("Lỗi định dạng JSON ở phần Phases");
+  }
+
+  try {
+    await prisma.playbook.create({
+      data: {
+        playbookId: formData.get('playbookId') as string, // Ví dụ: PB-51
+        title: formData.get('title') as string,
+        category: formData.get('category') as string,
+        severity: formData.get('severity') as string,
+        scenario: formData.get('scenario') as string,
+        detection: formData.get('detection') as string,
+        mitre: formData.get('mitre') as string,
+        phases: phasesData,
+      }
+    });
+  } catch (error) {
+    console.error("Create Error:", error);
+    throw new Error("Failed to create playbook. ID might already exist.");
+  }
+
+  revalidatePath('/');
+  redirect('/');
+}

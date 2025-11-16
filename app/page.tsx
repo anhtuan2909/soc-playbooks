@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getPlaybooks } from './lib/actions';
-import { Search, Shield, AlertTriangle } from 'lucide-react';
+// THÊM "PlusCircle" VÀO ĐÂY
+import { Search, Shield, AlertTriangle, PlusCircle } from 'lucide-react';
 
 // Tắt cache để luôn lấy dữ liệu mới nhất
 export const revalidate = 0; 
@@ -19,19 +20,30 @@ export default async function Home(props: {
   return (
     <main className="min-h-screen bg-slate-950 text-slate-200 p-6 font-sans">
       <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <header className="mb-10 border-b border-slate-800 pb-6 flex justify-between items-end">
+        
+        {/* Header (ĐÃ ĐƯỢC CẬP NHẬT VỚI NÚT BẤM MỚI) */}
+        <header className="mb-10 border-b border-slate-800 pb-6 flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-blue-500 flex items-center gap-3">
               <Shield className="w-8 h-8" /> SOC Incident Response Portal
             </h1>
             <p className="text-slate-400 mt-2 text-sm">Knowledge Base for SOC Team</p>
           </div>
-          <div className="bg-slate-900 px-4 py-2 rounded border border-slate-800 text-center">
-            <span className="block text-2xl font-bold text-white">{playbooks.length}</span>
-            <span className="text-xs text-slate-500 uppercase">Playbooks</span>
+          
+          <div className="flex gap-4 items-end">
+             {/* NÚT TẠO MỚI ĐÃ THÊM VÀO ĐÂY */}
+             <Link href="/playbook/new" className="flex items-center gap-2 bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-bold transition shadow-md border border-green-600">
+                <PlusCircle size={20}/> New Playbook
+             </Link>
+             
+             {/* HỘP ĐẾM SỐ LƯỢNG */}
+             <div className="bg-slate-900 px-4 py-2 rounded border border-slate-800 text-center min-w-[100px]">
+                <span className="block text-xl font-bold text-white">{playbooks.length}</span>
+                <span className="text-[10px] text-slate-500 uppercase">Total</span>
+             </div>
           </div>
         </header>
+        {/* (Phần còn lại của file giữ nguyên) */}
 
         {/* Search Bar */}
         <div className="relative mb-8">
@@ -51,7 +63,7 @@ export default async function Home(props: {
 
         {/* Danh sách Playbook */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {/* Đã có (pb: any) để fix lỗi build TypeScript */}
+																	 
           {playbooks.map((pb: any) => (
             <Link key={pb.id} href={`/playbook/${pb.playbookId}`} className="group block h-full">
               <div className="h-full bg-slate-900/50 border border-slate-800 p-6 rounded-xl hover:border-blue-500/50 hover:bg-slate-800 transition flex flex-col">
