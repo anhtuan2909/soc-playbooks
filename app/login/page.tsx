@@ -6,7 +6,7 @@ import { AlertCircle, CheckCircle, Loader2, LogIn } from 'lucide-react';
 
 export default function LoginPage() {
   const [errorMessage, setErrorMessage] = useState('');
-  const [successMessage, setSuccessMessage] = useState(''); // Thêm trạng thái thành công
+  const [successMessage, setSuccessMessage] = useState('');
   const [isPending, setIsPending] = useState(false);
 
   const handleSubmit = async (formData: FormData) => {
@@ -15,20 +15,26 @@ export default function LoginPage() {
     setSuccessMessage('');
 
     try {
-      // Gọi server action
-      const error = await authenticate(formData);
+      // Gọi Server Action
+      const errorMsg = await authenticate(formData);
       
-      if (error) {
-        setErrorMessage(error);
+      // Nếu hàm trả về chuỗi -> Nghĩa là có lỗi (Sai pass/Email)
+      if (errorMsg) {
+        setErrorMessage(errorMsg);
         setIsPending(false);
-      } else {
-        // Nếu không có lỗi trả về -> Thành công!
-        // Hiển thị thông báo xanh và giữ nguyên loading để chuyển trang
-        setSuccessMessage('Đăng nhập thành công! Đang chuyển hướng...');
-      }
+      }     																				
+	   
     } catch (e) {
-      // Lỗi redirect của Next.js là bình thường, không cần xử lý ở đây
-      // setIsPending(false); // Không tắt loading để tạo cảm giác mượt
+      // 💡 MẤU CHỐT Ở ĐÂY:
+      // Nếu Server Action thành công, nó sẽ ném ra lỗi "NEXT_REDIRECT".
+      // Chúng ta bắt lấy nó và hiển thị thông báo Thành Công.
+      
+      setSuccessMessage('Đăng nhập thành công! Đang vào hệ thống...');
+      
+      // Tự động chuyển trang sau 1 giây để người dùng kịp đọc thông báo
+      setTimeout(() => {
+        window.location.href = "/"; 
+      }, 1000);
     }
   };
 
@@ -36,7 +42,7 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-slate-950 p-4 font-sans">
       <form
         action={handleSubmit}
-        autoComplete="off" // 1. Tắt gợi ý điền tự động toàn bộ form
+        autoComplete="off"
         className="bg-slate-900 p-8 rounded-xl border border-slate-800 w-full max-w-md space-y-6 shadow-2xl"
       >
         <div className="text-center">
@@ -44,7 +50,7 @@ export default function LoginPage() {
           <p className="text-slate-400 text-sm">Đăng nhập quản trị hệ thống</p>
         </div>
 
-        {/* 2. Thông báo Lỗi (Màu đỏ) */}
+        {/* Thông báo Lỗi (Đỏ) */}
         {errorMessage && (
           <div className="bg-red-950/50 border border-red-900 text-red-400 p-3 rounded-lg flex items-center gap-2 text-sm animate-pulse">
             <AlertCircle size={18} />
@@ -52,9 +58,9 @@ export default function LoginPage() {
           </div>
         )}
 
-        {/* 3. Thông báo Thành công (Màu xanh) - MỚI */}
+        {/* Thông báo Thành công (Xanh) */}
         {successMessage && (
-          <div className="bg-green-950/50 border border-green-900 text-green-400 p-3 rounded-lg flex items-center gap-2 text-sm">
+          <div className="bg-green-950/50 border border-green-900 text-green-400 p-3 rounded-lg flex items-center gap-2 text-sm animate-bounce">
             <CheckCircle size={18} />
             <span>{successMessage}</span>
           </div>
@@ -67,9 +73,9 @@ export default function LoginPage() {
               name="email" 
               type="email" 
               required 
-              autoComplete="off" // Tắt gợi ý email
-              placeholder="Nhập địa chỉ email"
-              className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition" 
+              autoComplete="off"
+              placeholder="Nhập địa chỉ Email"
+              className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition placeholder:text-slate-600" 
             />
           </div>
           <div>
@@ -78,28 +84,33 @@ export default function LoginPage() {
               name="password" 
               type="password" 
               required 
-              autoComplete="new-password" // Mẹo: Dùng 'new-password' để trình duyệt không tự điền mật khẩu cũ
+              autoComplete="new-password"
               placeholder="Nhập mật khẩu"
-              className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition" 
+              className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition placeholder:text-slate-600" 
             />
           </div>
         </div>
 
         <button 
-          disabled={isPending}
+          disabled={isPending || !!successMessage}
           className={`w-full p-3 rounded-lg font-bold mt-4 transition flex items-center justify-center gap-2 text-white
-            ${successMessage ? 'bg-green-600' : 'bg-blue-600 hover:bg-blue-500'} 
+            ${successMessage ? 'bg-green-600 cursor-default' : 'bg-blue-600 hover:bg-blue-500'} 
             disabled:opacity-70 disabled:cursor-not-allowed`}
         >
-          {isPending ? (
+          {successMessage ? (
             <>
               <Loader2 size={20} className="animate-spin" />
-              {successMessage ? 'Redirecting...' : 'Checking...'}
+              Đang chuyển hướng...
+            </>
+          ) : isPending ? (
+            <>
+              <Loader2 size={20} className="animate-spin" />
+              Đang kiểm tra...
             </>
           ) : (
             <>
               <LogIn size={20} />
-              Sign In
+              Đăng nhập
             </>
           )}
         </button>
