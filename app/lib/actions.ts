@@ -1,14 +1,18 @@
 'use server'
+
 import { prisma } from './db';
-// Đã thêm signIn vào dòng import này
 import { auth, signOut, signIn } from '@/auth'; 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { AuthError } from 'next-auth';
 
-// --- PHẦN 1: PLAYBOOK (Đã bảo mật) ---
+// --- PHẦN 1: PLAYBOOK (Đọc dữ liệu - Đã thêm khóa bảo mật) ---
 
 export async function getPlaybooks(query: string) {
+  // 🛡️ CHỐT CHẶN 1: Phải đăng nhập mới được lấy danh sách
+  const session = await auth();
+  if (!session || !session.user) return []; 
+
   try {
     return await prisma.playbook.findMany({
       where: {
@@ -26,8 +30,18 @@ export async function getPlaybooks(query: string) {
 }
 
 export async function getPlaybookById(id: string) {
-  return await prisma.playbook.findUnique({ where: { playbookId: id } });
+  // 🛡️ CHỐT CHẶN 2: Phải đăng nhập mới xem được chi tiết
+  const session = await auth();
+  if (!session || !session.user) return null;
+
+  try {
+    return await prisma.playbook.findUnique({ 
+        where: { playbookId: id } 
+    });
+  } catch (error) { return null; }
 }
+
+// --- PHẦN 2: PLAYBOOK (Ghi dữ liệu - Chỉ Admin) ---
 
 export async function createPlaybook(formData: FormData) {
   const session = await auth();
@@ -73,7 +87,7 @@ export async function updatePlaybook(formData: FormData) {
   redirect(`/playbook/${id}`);
 }
 
-// --- PHẦN 2: USER MANAGEMENT (Mới) ---
+// --- PHẦN 3: USER MANAGEMENT (Quản lý nhân sự) ---
 
 export async function getUsers() {
   const session = await auth();
@@ -108,7 +122,7 @@ export async function deleteUser(formData: FormData) {
   revalidatePath('/admin/users');
 }
 
-// --- PHẦN 3: AUTHENTICATION (Đăng nhập/Đăng xuất) ---
+// --- PHẦN 4: AUTHENTICATION (Xử lý Đăng nhập/Đăng xuất) ---
 
 export async function handleSignOut() {
   await signOut();

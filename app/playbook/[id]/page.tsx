@@ -1,21 +1,24 @@
-import { auth } from '@/auth'; // Lấy session
+import { auth } from '@/auth';
 import { getPlaybookById } from '@/app/lib/actions';
 import Link from 'next/link';
 import { ArrowLeft, Activity, ShieldCheck, Target, Layers, AlertOctagon, Edit } from 'lucide-react';
+import { redirect } from 'next/navigation'; // <--- Import quan trọng
 
-// Cập nhật kiểu dữ liệu chuẩn Next.js 15
 export default async function PlaybookDetail(props: { 
   params: Promise<{ id: string }> 
 }) {
-  // 1. AWAIT params (Bắt buộc ở Next.js 15)
   const params = await props.params;
   const decodedId = decodeURIComponent(params.id);
 
-  // 2. Lấy quyền người dùng
   const session = await auth();
-  const isAdmin = (session?.user as any)?.role === 'ADMIN';
 
-  // 3. Lấy dữ liệu Playbook
+  // ⛔ CHẶN CỬA SAU: Nếu chưa đăng nhập -> Về trang Login
+  if (!session || !session.user) {
+    redirect('/login');
+  }
+
+  const isAdmin = (session.user as any).role === 'ADMIN';
+
   const pb = await getPlaybookById(decodedId);
   
   if (!pb) return (
@@ -36,7 +39,7 @@ export default async function PlaybookDetail(props: {
             <ArrowLeft size={18} className="mr-2" /> Back to Portal
           </Link>
 
-          {/* 🛡️ CHỈ HIỆN NÚT EDIT NẾU LÀ ADMIN */}
+          {/* Chỉ Admin mới thấy nút sửa */}
           {isAdmin && (
             <Link href={`/playbook/${pb.playbookId}/edit`} className="inline-flex items-center bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-bold transition">
                 <Edit size={18} className="mr-2"/> Edit Playbook
