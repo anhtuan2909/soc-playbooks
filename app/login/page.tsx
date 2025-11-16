@@ -5,9 +5,13 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-slate-950">
       <form
         action={async (formData) => {
-          "use server"
-          await signIn("credentials", formData)
-        }}
+		  "use server"
+		  await signIn("credentials", {
+			email: formData.get("email"),
+			password: formData.get("password"),
+			redirectTo: "/", // <--- Dòng quan trọng: Bắt buộc chuyển về trang chủ
+		  })
+		}}
         className="bg-slate-900 p-8 rounded-xl border border-slate-800 w-96 space-y-4 shadow-2xl"
       >
         <h1 className="text-2xl font-bold text-white mb-6 text-center">SOC Portal Login</h1>

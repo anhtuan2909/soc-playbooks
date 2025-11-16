@@ -31,15 +31,17 @@ async function main() {
   // Tạo Admin mặc định
   const adminEmail = 'admin@soc.local';
   await prisma.user.upsert({
-    where: { email: adminEmail },
-    update: {},
-    create: {
-      email: adminEmail,
-      password: 'admin123', // Pass mặc định
-      role: 'ADMIN'
-    }
-  });
-  console.log('✅ Đã tạo Admin: admin@soc.local / admin123');
+  where: { email: adminEmail },
+  update: { // <--- Thêm dòng này để cập nhật mật khẩu mới
+    password: 'Soc@2025!' 
+  },
+  create: {
+    email: adminEmail,
+    password: 'Soc@2025!',
+    role: 'ADMIN'
+  }
+});
+  console.log('✅ Đã tạo Admin: admin@soc.local / Soc@2025!');
 }
 
 main()
