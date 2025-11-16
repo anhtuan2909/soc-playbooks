@@ -1,65 +1,86 @@
-import Image from "next/image";
+import Link from 'next/link';
+import { getPlaybooks } from './lib/actions';
+import { Search, Shield, AlertTriangle } from 'lucide-react';
 
-export default function Home() {
+// Tắt cache để luôn lấy dữ liệu mới nhất
+export const revalidate = 0; 
+
+export default async function Home({ searchParams }: { searchParams: { q: string } }) {
+  const query = searchParams?.q || '';
+  const playbooks = await getPlaybooks(query);
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <main className="min-h-screen bg-slate-950 text-slate-200 p-6 font-sans">
+      <div className="max-w-7xl mx-auto">
+        {/* Header */}
+        <header className="mb-10 border-b border-slate-800 pb-6 flex justify-between items-end">
+          <div>
+            <h1 className="text-3xl font-bold text-blue-500 flex items-center gap-3">
+              <Shield className="w-8 h-8" /> SOC Incident Response Portal
+            </h1>
+            <p className="text-slate-400 mt-2 text-sm">Knowledge Base for SOC Team</p>
+          </div>
+          <div className="bg-slate-900 px-4 py-2 rounded border border-slate-800 text-center">
+            <span className="block text-2xl font-bold text-white">{playbooks.length}</span>
+            <span className="text-xs text-slate-500 uppercase">Playbooks</span>
+          </div>
+        </header>
+
+        {/* Search Bar */}
+        <div className="relative mb-8">
+          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+            <Search className="text-slate-500" />
+          </div>
+          <form>
+            <input
+              name="q"
+              defaultValue={query}
+              autoComplete="off"
+              placeholder="🔍 Tìm kiếm ID (PB-01), Tên sự cố, hoặc MITRE..."
+              className="w-full bg-slate-900 border border-slate-700 rounded-xl py-4 pl-12 pr-4 text-lg text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition shadow-lg"
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          </form>
         </div>
-      </main>
-    </div>
+
+        {/* Danh sách Playbook */}
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+          {playbooks.map((pb) => (
+            <Link key={pb.id} href={`/playbook/${pb.playbookId}`} className="group block h-full">
+              <div className="h-full bg-slate-900/50 border border-slate-800 p-6 rounded-xl hover:border-blue-500/50 hover:bg-slate-800 transition flex flex-col">
+                <div className="flex justify-between items-start mb-4">
+                  <span className="font-mono text-xs font-bold text-slate-400 bg-slate-950 border border-slate-800 px-2 py-1 rounded">
+                    {pb.playbookId}
+                  </span>
+                  <span className={`text-xs font-bold px-2 py-1 rounded border ${
+                    pb.severity === 'Critical' ? 'bg-red-950/40 text-red-400 border-red-900' :
+                    pb.severity === 'High' ? 'bg-orange-950/40 text-orange-400 border-orange-900' :
+                    'bg-blue-950/40 text-blue-400 border-blue-900'
+                  }`}>
+                    {pb.severity?.toUpperCase()}
+                  </span>
+                </div>
+                <h3 className="text-lg font-bold text-slate-100 mb-3 group-hover:text-blue-400 transition line-clamp-2">
+                  {pb.title}
+                </h3>
+                <p className="text-sm text-slate-400 line-clamp-3 mb-4 flex-grow">
+                  {pb.scenario}
+                </p>
+                <div className="mt-auto pt-4 border-t border-slate-800 flex justify-between items-center text-xs text-slate-500">
+                  <span className="bg-slate-800 px-2 py-1 rounded">{pb.category}</span>
+                  <span className="text-blue-500 group-hover:translate-x-1 transition">Xem chi tiết →</span>
+                </div>
+              </div>
+            </Link>
+          ))}
+        </div>
+        
+        {playbooks.length === 0 && (
+            <div className="text-center py-20 text-slate-500">
+                <AlertTriangle className="mx-auto mb-2 w-10 h-10 opacity-50"/>
+                Không tìm thấy playbook nào khớp với từ khóa "{query}"
+            </div>
+        )}
+      </div>
+    </main>
   );
 }
