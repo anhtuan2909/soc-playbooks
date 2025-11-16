@@ -29,9 +29,16 @@ export default async function PlaybookDetail(props: {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 p-6 md:p-10 font-sans">
       <div className="max-w-6xl mx-auto">
-        <Link href="/" className="inline-flex items-center text-slate-400 hover:text-white mb-8 transition bg-slate-900 px-4 py-2 rounded-lg border border-slate-800 hover:border-slate-600">
-          <ArrowLeft size={18} className="mr-2" /> Back to Portal
-        </Link>
+        <div className="flex justify-between items-center mb-8">
+		  <Link href="/" className="inline-flex items-center text-slate-400 hover:text-white transition bg-slate-900 px-4 py-2 rounded-lg border border-slate-800 hover:border-slate-600">
+			<ArrowLeft size={18} className="mr-2" /> Back to Portal
+		  </Link>
+
+  {/* NÚT EDIT MỚI */}
+		  <Link href={`/playbook/${pb.playbookId}/edit`} className="inline-flex items-center bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-bold transition">
+			Edit Playbook
+		  </Link>
+		</div>
 
         {/* Header */}
         <div className="border-b border-slate-800 pb-8 mb-8">
