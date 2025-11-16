@@ -1,8 +1,10 @@
 'use server'
 import { prisma } from './db';
-import { auth, signOut } from '@/auth'; // <--- Gộp chung vào 1 dòng duy nhất
+// Đã thêm signIn vào dòng import này
+import { auth, signOut, signIn } from '@/auth'; 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { AuthError } from 'next-auth';
 
 // --- PHẦN 1: PLAYBOOK (Đã bảo mật) ---
 
@@ -106,7 +108,28 @@ export async function deleteUser(formData: FormData) {
   revalidatePath('/admin/users');
 }
 
-// --- PHẦN 3: ĐĂNG XUẤT ---
+// --- PHẦN 3: AUTHENTICATION (Đăng nhập/Đăng xuất) ---
+
 export async function handleSignOut() {
   await signOut();
+}
+
+export async function authenticate(formData: FormData) {
+  try {
+    await signIn('credentials', {
+      email: formData.get('email'),
+      password: formData.get('password'),
+      redirectTo: '/',
+    });
+  } catch (error) {
+    if (error instanceof AuthError) {
+      switch (error.type) {
+        case 'CredentialsSignin':
+          return '❌ Email hoặc mật khẩu không chính xác.';
+        default:
+          return '⚠️ Lỗi hệ thống. Vui lòng thử lại.';
+      }
+    }
+    throw error;
+  }
 }
