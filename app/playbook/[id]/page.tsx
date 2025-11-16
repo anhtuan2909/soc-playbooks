@@ -108,7 +108,7 @@ export default async function PlaybookDetail(props: {
                 {phases && phases.length > 0 ? phases.map((phase: any, idx: number) => (
                   <div key={idx} className="bg-slate-900 rounded-xl border border-slate-800 overflow-hidden">
                     <div className="bg-slate-800/80 px-6 py-4 border-b border-slate-700/50 font-bold text-blue-200">
-                      {idx + 1}. {phase.phase}
+                      <span>{phase.phase}</span> {/* <-- SỬA LỖI LẶP SỐ THỨ TỰ Ở ĐÂY */}
                     </div>
                     <div className="p-6">
                       <ul className="space-y-6">
