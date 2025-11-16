@@ -1,14 +1,22 @@
-import { getPlaybooks } from './lib/actions';
+import { auth } from '@/auth'; 
+import { getPlaybooks } from '@/app/lib/actions'; // <-- Đã sửa đường dẫn chuẩn
 import DashboardClient from './components/DashboardClient';
 
-// Tắt cache để luôn lấy dữ liệu mới nhất từ Database
 export const revalidate = 0; 
 
 export default async function Home() {
-  // Bước 1: Lấy TOÀN BỘ danh sách từ Database
-  // Truyền chuỗi rỗng '' để hàm getPlaybooks trả về tất cả
+  // 1. Lấy thông tin người dùng hiện tại
+  const session = await auth();
+  const userRole = (session?.user as any)?.role || 'VIEWER'; 
+
+  // 2. Lấy TOÀN BỘ danh sách Playbook
   const allPlaybooks = await getPlaybooks('');
 
-  // Bước 2: Đẩy toàn bộ dữ liệu sang DashboardClient để hiển thị và lọc
-  return <DashboardClient initialPlaybooks={allPlaybooks} />;
+  // 3. Truyền dữ liệu và quyền xuống component Client
+  return (
+    <DashboardClient 
+      initialPlaybooks={allPlaybooks} 
+      userRole={userRole} 
+    />
+  );
 }

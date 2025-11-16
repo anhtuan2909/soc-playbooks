@@ -27,3 +27,11 @@ model Playbook {
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
 }
+
+model User {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String   
+  role      String   @default("VIEWER") // "ADMIN" hoặc "VIEWER"
+  createdAt DateTime @default(now())
+}

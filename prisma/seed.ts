@@ -28,6 +28,18 @@ async function main() {
     })
   }
   console.log('✅ Nap du lieu thanh cong!');
+  // Tạo Admin mặc định
+  const adminEmail = 'admin@soc.local';
+  await prisma.user.upsert({
+    where: { email: adminEmail },
+    update: {},
+    create: {
+      email: adminEmail,
+      password: 'admin123', // Pass mặc định
+      role: 'ADMIN'
+    }
+  });
+  console.log('✅ Đã tạo Admin: admin@soc.local / admin123');
 }
 
 main()

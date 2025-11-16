@@ -1,26 +1,27 @@
+import { auth } from '@/auth'; // Lấy session
 import { getPlaybookById } from '@/app/lib/actions';
 import Link from 'next/link';
-import { ArrowLeft, Activity, ShieldCheck, Target, Layers, AlertOctagon } from 'lucide-react';
+import { ArrowLeft, Activity, ShieldCheck, Target, Layers, AlertOctagon, Edit } from 'lucide-react';
 
-// Cập nhật kiểu dữ liệu cho Next.js 15
+// Cập nhật kiểu dữ liệu chuẩn Next.js 15
 export default async function PlaybookDetail(props: { 
   params: Promise<{ id: string }> 
 }) {
-  // BƯỚC QUAN TRỌNG: Phải await params trước khi lấy ID
+  // 1. AWAIT params (Bắt buộc ở Next.js 15)
   const params = await props.params;
-  
-  // Giải mã ID (phòng trường hợp URL bị mã hóa ký tự lạ)
   const decodedId = decodeURIComponent(params.id);
 
+  // 2. Lấy quyền người dùng
+  const session = await auth();
+  const isAdmin = (session?.user as any)?.role === 'ADMIN';
+
+  // 3. Lấy dữ liệu Playbook
   const pb = await getPlaybookById(decodedId);
   
   if (!pb) return (
-    <div className="min-h-screen bg-slate-950 text-slate-400 p-10 flex flex-col items-center justify-center font-sans">
-        <h2 className="text-2xl font-bold text-white mb-4">Playbook Not Found</h2>
-        <p className="mb-6">Could not find playbook with ID: <span className="font-mono text-blue-400">{decodedId}</span></p>
-        <Link href="/" className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition">
-            Back to Portal
-        </Link>
+    <div className="min-h-screen bg-slate-950 text-white p-10 flex justify-center items-center flex-col">
+        <h2 className="text-2xl font-bold mb-4">Playbook Not Found</h2>
+        <Link href="/" className="text-blue-500 hover:underline">Back to Portal</Link>
     </div>
   );
 
@@ -29,16 +30,19 @@ export default async function PlaybookDetail(props: {
   return (
     <div className="min-h-screen bg-slate-950 text-slate-200 p-6 md:p-10 font-sans">
       <div className="max-w-6xl mx-auto">
+        
         <div className="flex justify-between items-center mb-8">
-		  <Link href="/" className="inline-flex items-center text-slate-400 hover:text-white transition bg-slate-900 px-4 py-2 rounded-lg border border-slate-800 hover:border-slate-600">
-			<ArrowLeft size={18} className="mr-2" /> Back to Portal
-		  </Link>
+          <Link href="/" className="inline-flex items-center text-slate-400 hover:text-white transition bg-slate-900 px-4 py-2 rounded-lg border border-slate-800 hover:border-slate-600">
+            <ArrowLeft size={18} className="mr-2" /> Back to Portal
+          </Link>
 
-  {/* NÚT EDIT MỚI */}
-		  <Link href={`/playbook/${pb.playbookId}/edit`} className="inline-flex items-center bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-bold transition">
-			Edit Playbook
-		  </Link>
-		</div>
+          {/* 🛡️ CHỈ HIỆN NÚT EDIT NẾU LÀ ADMIN */}
+          {isAdmin && (
+            <Link href={`/playbook/${pb.playbookId}/edit`} className="inline-flex items-center bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-bold transition">
+                <Edit size={18} className="mr-2"/> Edit Playbook
+            </Link>
+          )}
+        </div>
 
         {/* Header */}
         <div className="border-b border-slate-800 pb-8 mb-8">
@@ -63,9 +67,8 @@ export default async function PlaybookDetail(props: {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Left Column */}
+          {/* Cột trái */}
           <div className="lg:col-span-2 space-y-8">
-            
             <div className="bg-slate-900 p-6 rounded-xl border border-slate-800 shadow-sm">
               <h3 className="text-blue-400 font-bold mb-3 flex items-center gap-2 text-lg">
                 <Activity size={20}/> Threat Scenario
@@ -108,7 +111,7 @@ export default async function PlaybookDetail(props: {
             </div>
           </div>
 
-          {/* Right Column */}
+          {/* Cột phải */}
           <div className="space-y-6">
             <div className="bg-slate-900 p-5 rounded-xl border border-slate-800">
               <h3 className="text-orange-400 font-bold mb-3 flex items-center gap-2"><Target size={18}/> Detection Sources</h3>

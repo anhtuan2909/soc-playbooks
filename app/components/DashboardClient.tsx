@@ -4,10 +4,15 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { Search, Shield, AlertTriangle, PlusCircle } from 'lucide-react';
 
-export default function DashboardClient({ initialPlaybooks }: { initialPlaybooks: any[] }) {
+interface DashboardProps {
+  initialPlaybooks: any[];
+  userRole: string; // Nhận thêm quyền hạn từ Server
+}
+
+export default function DashboardClient({ initialPlaybooks, userRole }: DashboardProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Logic lọc dữ liệu ngay lập tức (Real-time Search)
+  // Logic lọc dữ liệu ngay lập tức
   const filteredPlaybooks = initialPlaybooks.filter((pb) => {
     const term = searchTerm.toLowerCase();
     return (
@@ -23,7 +28,7 @@ export default function DashboardClient({ initialPlaybooks }: { initialPlaybooks
     <main className="min-h-screen bg-slate-950 text-slate-200 p-6 font-sans">
       <div className="max-w-7xl mx-auto">
         
-        {/* Header: BAO GỒM CẢ NÚT NEW PLAYBOOK */}
+        {/* Header */}
         <header className="mb-10 border-b border-slate-800 pb-6 flex justify-between items-center">
           <div>
             <h1 className="text-3xl font-bold text-blue-500 flex items-center gap-3">
@@ -33,10 +38,12 @@ export default function DashboardClient({ initialPlaybooks }: { initialPlaybooks
           </div>
           
           <div className="flex gap-4 items-end">
-             {/* Nút thêm mới vẫn ở đây */}
-             <Link href="/playbook/new" className="flex items-center gap-2 bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-bold transition shadow-md border border-green-600">
-                <PlusCircle size={20}/> New Playbook
-             </Link>
+             {/* 🛡️ CHỈ HIỆN NÚT NẾU LÀ ADMIN */}
+             {userRole === 'ADMIN' && (
+               <Link href="/playbook/new" className="flex items-center gap-2 bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-bold transition shadow-md border border-green-600">
+                  <PlusCircle size={20}/> New Playbook
+               </Link>
+             )}
              
              <div className="bg-slate-900 px-4 py-2 rounded border border-slate-800 text-center min-w-[100px]">
                 <span className="block text-xl font-bold text-white">{filteredPlaybooks.length}</span>
@@ -45,7 +52,7 @@ export default function DashboardClient({ initialPlaybooks }: { initialPlaybooks
           </div>
         </header>
 
-        {/* Thanh tìm kiếm (Có sự kiện onChange để lọc ngay) */}
+        {/* Thanh tìm kiếm */}
         <div className="relative mb-8">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <Search className="text-slate-500" />
@@ -59,7 +66,7 @@ export default function DashboardClient({ initialPlaybooks }: { initialPlaybooks
           />
         </div>
 
-        {/* Danh sách hiển thị */}
+        {/* Danh sách Playbook */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
           {filteredPlaybooks.map((pb) => (
             <Link key={pb.id} href={`/playbook/${pb.playbookId}`} className="group block h-full">
@@ -94,7 +101,7 @@ export default function DashboardClient({ initialPlaybooks }: { initialPlaybooks
         {filteredPlaybooks.length === 0 && (
             <div className="text-center py-20 text-slate-500">
                 <AlertTriangle className="mx-auto mb-2 w-10 h-10 opacity-50"/>
-                Không tìm thấy playbook nào khớp với từ khóa "{searchTerm}"
+                Không tìm thấy kết quả nào cho từ khóa "{searchTerm}"
             </div>
         )}
       </div>
