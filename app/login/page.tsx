@@ -68,7 +68,7 @@ export default function LoginPage() {
               type="email" 
               required 
               autoComplete="off" // Tắt gợi ý email
-              placeholder="admin@soc.local"
+              placeholder="Nhập địa chỉ email"
               className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition" 
             />
           </div>
@@ -79,7 +79,7 @@ export default function LoginPage() {
               type="password" 
               required 
               autoComplete="new-password" // Mẹo: Dùng 'new-password' để trình duyệt không tự điền mật khẩu cũ
-              placeholder="••••••"
+              placeholder="Nhập mật khẩu"
               className="w-full bg-slate-950 border border-slate-700 rounded-lg p-3 text-white focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none transition" 
             />
           </div>
