@@ -2,10 +2,27 @@ import { getPlaybookById } from '@/app/lib/actions';
 import Link from 'next/link';
 import { ArrowLeft, Activity, ShieldCheck, Target, Layers, AlertOctagon } from 'lucide-react';
 
-export default async function PlaybookDetail({ params }: { params: { id: string } }) {
-  const pb = await getPlaybookById(params.id);
+// Cập nhật kiểu dữ liệu cho Next.js 15
+export default async function PlaybookDetail(props: { 
+  params: Promise<{ id: string }> 
+}) {
+  // BƯỚC QUAN TRỌNG: Phải await params trước khi lấy ID
+  const params = await props.params;
   
-  if (!pb) return <div className="min-h-screen bg-slate-950 text-white p-10 flex justify-center">Playbook Not Found</div>;
+  // Giải mã ID (phòng trường hợp URL bị mã hóa ký tự lạ)
+  const decodedId = decodeURIComponent(params.id);
+
+  const pb = await getPlaybookById(decodedId);
+  
+  if (!pb) return (
+    <div className="min-h-screen bg-slate-950 text-slate-400 p-10 flex flex-col items-center justify-center font-sans">
+        <h2 className="text-2xl font-bold text-white mb-4">Playbook Not Found</h2>
+        <p className="mb-6">Could not find playbook with ID: <span className="font-mono text-blue-400">{decodedId}</span></p>
+        <Link href="/" className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg transition">
+            Back to Portal
+        </Link>
+    </div>
+  );
 
   const phases = pb.phases as any[];
 
@@ -13,7 +30,7 @@ export default async function PlaybookDetail({ params }: { params: { id: string 
     <div className="min-h-screen bg-slate-950 text-slate-200 p-6 md:p-10 font-sans">
       <div className="max-w-6xl mx-auto">
         <Link href="/" className="inline-flex items-center text-slate-400 hover:text-white mb-8 transition bg-slate-900 px-4 py-2 rounded-lg border border-slate-800 hover:border-slate-600">
-          <ArrowLeft size={18} className="mr-2" /> Quay lại
+          <ArrowLeft size={18} className="mr-2" /> Back to Portal
         </Link>
 
         {/* Header */}
@@ -26,7 +43,9 @@ export default async function PlaybookDetail({ params }: { params: { id: string 
           </div>
           <div className="flex gap-3 text-sm">
             <span className={`px-3 py-1 rounded-full font-bold border ${
-                pb.severity === 'Critical' ? 'bg-red-950/50 text-red-400 border-red-900' : 'bg-orange-950/50 text-orange-400 border-orange-900'
+                pb.severity === 'Critical' ? 'bg-red-950/50 text-red-400 border-red-900' : 
+                pb.severity === 'High' ? 'bg-orange-950/50 text-orange-400 border-orange-900' :
+                'bg-blue-950/50 text-blue-400 border-blue-900'
             }`}>
               {pb.severity}
             </span>
@@ -37,17 +56,19 @@ export default async function PlaybookDetail({ params }: { params: { id: string 
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          {/* Left Column */}
           <div className="lg:col-span-2 space-y-8">
+            
             <div className="bg-slate-900 p-6 rounded-xl border border-slate-800 shadow-sm">
               <h3 className="text-blue-400 font-bold mb-3 flex items-center gap-2 text-lg">
-                <Activity size={20}/> Kịch bản (Scenario)
+                <Activity size={20}/> Threat Scenario
               </h3>
               <p className="text-slate-300 leading-relaxed text-lg">{pb.scenario}</p>
             </div>
             
             <div>
               <h3 className="text-2xl font-bold text-white mb-6 flex items-center gap-2">
-                 <Layers size={24} className="text-blue-500"/> Quy trình xử lý
+                 <Layers size={24} className="text-blue-500"/> Response Procedure
               </h3>
               <div className="space-y-6">
                 {phases && phases.length > 0 ? phases.map((phase: any, idx: number) => (
@@ -73,23 +94,32 @@ export default async function PlaybookDetail({ params }: { params: { id: string 
                   </div>
                 )) : (
                   <div className="p-8 text-center bg-slate-900 rounded-xl border border-slate-800 border-dashed text-slate-500">
-                    Chưa có chi tiết các bước xử lý.
+                    No detailed steps available.
                   </div>
                 )}
               </div>
             </div>
           </div>
 
+          {/* Right Column */}
           <div className="space-y-6">
             <div className="bg-slate-900 p-5 rounded-xl border border-slate-800">
-              <h3 className="text-orange-400 font-bold mb-3 flex items-center gap-2"><Target size={18}/> Nguồn phát hiện</h3>
+              <h3 className="text-orange-400 font-bold mb-3 flex items-center gap-2"><Target size={18}/> Detection Sources</h3>
               <p className="text-sm text-slate-300">{pb.detection}</p>
             </div>
             <div className="bg-slate-900 p-5 rounded-xl border border-slate-800">
               <h3 className="text-red-400 font-bold mb-3 flex items-center gap-2"><AlertOctagon size={18}/> MITRE ATT&CK</h3>
-              <div className="text-sm text-slate-300 font-mono bg-black/30 p-3 rounded border border-slate-800/50">
+              <div className="text-sm text-slate-300 font-mono bg-black/30 p-3 rounded border border-slate-800/50 break-words">
                   {pb.mitre || "N/A"}
               </div>
+            </div>
+             <div className="bg-blue-950/20 p-5 rounded-xl border border-blue-900/30">
+              <h3 className="text-blue-400 font-bold mb-3 flex items-center gap-2"><ShieldCheck size={18}/> Tools Involved</h3>
+              <ul className="text-sm text-slate-300 list-disc list-inside space-y-2 pl-2">
+                <li>SIEM (Splunk, Sentinel)</li>
+                <li>EDR (CrowdStrike, Defender)</li>
+                <li>Identity Logs</li>
+              </ul>
             </div>
           </div>
         </div>
