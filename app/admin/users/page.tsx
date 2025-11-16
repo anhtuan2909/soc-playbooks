@@ -5,7 +5,7 @@ import { ArrowLeft, Trash2, UserPlus, ShieldAlert } from 'lucide-react';
 
 export default async function UserManagement() {
   const session = await auth();
-  // Nếu không phải Admin -> Chặn ngay
+											 
   if ((session?.user as any)?.role !== 'ADMIN') {
     return <div className="text-white p-10 text-center">⛔ Access Denied</div>;
   }
@@ -46,7 +46,9 @@ export default async function UserManagement() {
                 <div>
                     <label className="block text-sm text-slate-400 mb-1">Vai trò</label>
                     <select name="role" className="w-full bg-slate-950 border border-slate-700 rounded p-3 text-white outline-none focus:border-blue-500">
-                        <option value="VIEWER">Viewer (Chỉ xem)</option>
+                        {/* --- ĐÃ THÊM OPTION GUEST Ở ĐÂY --- */}
+                        <option value="GUEST">Guest (Chỉ xem list)</option>
+                        <option value="VIEWER">Viewer (Xem chi tiết)</option>
                         <option value="ADMIN">Admin (Toàn quyền)</option>
                     </select>
                 </div>
@@ -72,7 +74,11 @@ export default async function UserManagement() {
                             <tr key={user.id} className="hover:bg-slate-800/50">
                                 <td className="p-4 font-medium text-white">{user.email}</td>
                                 <td className="p-4">
-                                    <span className={`px-2 py-1 rounded text-xs font-bold ${user.role === 'ADMIN' ? 'bg-blue-900 text-blue-300' : 'bg-slate-700 text-slate-300'}`}>
+                                    {/* Logic màu sắc cho từng Role */}
+                                    <span className={`px-2 py-1 rounded text-xs font-bold 
+                                      ${user.role === 'ADMIN' ? 'bg-blue-900 text-blue-300' : 
+                                        user.role === 'GUEST' ? 'bg-yellow-900/50 text-yellow-500' : 
+                                        'bg-slate-700 text-slate-300'}`}>
                                         {user.role}
                                     </span>
                                 </td>

@@ -1,8 +1,8 @@
 import { auth } from '@/auth';
 import { getPlaybookById } from '@/app/lib/actions';
 import Link from 'next/link';
-import { ArrowLeft, Activity, ShieldCheck, Target, Layers, AlertOctagon, Edit } from 'lucide-react';
-import { redirect } from 'next/navigation'; // <--- Import quan trọng
+import { ArrowLeft, Activity, ShieldCheck, Target, Layers, AlertOctagon, Edit, Lock } from 'lucide-react';
+import { redirect } from 'next/navigation';
 
 export default async function PlaybookDetail(props: { 
   params: Promise<{ id: string }> 
@@ -12,13 +12,36 @@ export default async function PlaybookDetail(props: {
 
   const session = await auth();
 
-  // ⛔ CHẶN CỬA SAU: Nếu chưa đăng nhập -> Về trang Login
+  // 1. Chặn người chưa đăng nhập
   if (!session || !session.user) {
     redirect('/login');
   }
 
-  const isAdmin = (session.user as any).role === 'ADMIN';
+  const userRole = (session.user as any).role;
+  const isAdmin = userRole === 'ADMIN';
 
+  // 2. 🛡️ LOGIC MỚI: CHẶN TÀI KHOẢN GUEST
+  if (userRole === 'GUEST') {
+    return (
+      <div className="min-h-screen bg-slate-950 text-slate-200 p-10 flex flex-col items-center justify-center font-sans text-center">
+        <div className="bg-slate-900 p-8 rounded-2xl border border-slate-800 max-w-lg shadow-2xl">
+          <div className="bg-yellow-900/20 p-4 rounded-full w-fit mx-auto mb-6">
+            <Lock size={48} className="text-yellow-500" />
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-3">Giới hạn quyền truy cập</h2>
+          <p className="text-slate-400 mb-8">
+            Tài khoản <strong>Guest</strong> chỉ được phép xem danh sách tổng quan. <br/>
+            Vui lòng liên hệ Admin để được cấp quyền xem chi tiết nội dung Playbook <strong>{decodedId}</strong>.
+          </p>
+          <Link href="/" className="inline-block bg-slate-800 hover:bg-slate-700 text-white px-6 py-3 rounded-lg font-medium transition border border-slate-700">
+            Quay lại Dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  // 3. Lấy dữ liệu (Nếu là Viewer hoặc Admin)
   const pb = await getPlaybookById(decodedId);
   
   if (!pb) return (
@@ -39,7 +62,6 @@ export default async function PlaybookDetail(props: {
             <ArrowLeft size={18} className="mr-2" /> Back to Portal
           </Link>
 
-          {/* Chỉ Admin mới thấy nút sửa */}
           {isAdmin && (
             <Link href={`/playbook/${pb.playbookId}/edit`} className="inline-flex items-center bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-lg font-bold transition">
                 <Edit size={18} className="mr-2"/> Edit Playbook
@@ -47,7 +69,7 @@ export default async function PlaybookDetail(props: {
           )}
         </div>
 
-        {/* Header */}
+        {/* Nội dung Playbook (Giữ nguyên) */}
         <div className="border-b border-slate-800 pb-8 mb-8">
           <div className="flex flex-col md:flex-row md:items-center gap-4 mb-4">
              <span className="font-mono text-2xl font-bold text-blue-500 bg-blue-950/30 border border-blue-900 px-3 py-1 rounded w-fit">
@@ -70,7 +92,6 @@ export default async function PlaybookDetail(props: {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Cột trái */}
           <div className="lg:col-span-2 space-y-8">
             <div className="bg-slate-900 p-6 rounded-xl border border-slate-800 shadow-sm">
               <h3 className="text-blue-400 font-bold mb-3 flex items-center gap-2 text-lg">
@@ -114,7 +135,6 @@ export default async function PlaybookDetail(props: {
             </div>
           </div>
 
-          {/* Cột phải */}
           <div className="space-y-6">
             <div className="bg-slate-900 p-5 rounded-xl border border-slate-800">
               <h3 className="text-orange-400 font-bold mb-3 flex items-center gap-2"><Target size={18}/> Detection Sources</h3>
