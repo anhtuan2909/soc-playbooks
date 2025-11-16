@@ -333,5 +333,2683 @@
         ]
       }
     ]
+  },
+  {
+    "playbookId": "PB-06",
+    "title": "Persistent Access via Cloud Backdoor Accounts",
+    "category": "Cloud Security",
+    "severity": "Critical",
+    "scenario": "An attacker (or malicious insider) creates or retains hidden IAM users, service accounts or credentials within a cloud environment to maintain persistence even after remediation of the initial incident. These accounts may be created under obscure names, embedded in automation or linked via federated identity.",
+    "detection": "CSPM, SIEM, IAM Audit Logs, CloudTrail, Identity Governance Tools, Threat Intelligence.",
+    "mitre": "T1098 (Account Manipulation), T1078.004 (Cloud Accounts), T1556.004 (Cloud ID Manipulation.",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enable detailed IAM logging", "detail": "Track all user/role creations, access keys, and trust relationship updates." },
+          { "action": "Monitor new account creation", "detail": "Real-time alerting for new IAM users, roles or access keys." },
+          { "action": "Enforce IAM review cycles", "detail": "Periodically audit all cloud identities, including long-unused accounts." }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Unknown user/role/key detected performing actions or appearing in audit logs." },
+          { "action": "Identify how the account was created", "detail": "Via console, API, automation script or federated link." },
+          { "action": "Review activity logs", "detail": "What has the backdoor account accessed, modified or created?" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Disable or delete the backdoor account", "detail": "Immediately remove user, role or service principal." },
+          { "action": "Revoke related credentials", "detail": "API keys, tokens, sessions and certificates." },
+          { "action": "Audit for lateral movement", "detail": "Check if attacker used the backdoor to create more access pathways." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Review all IAM configurations", "detail": "Identify and remove unused or risky roles, policies and trust relationships." },
+          { "action": "Rotate keys and secrets", "detail": "For all services that could have been accessed through the backdoor." },
+          { "action": "Harden IAM policies", "detail": "Block wildcard privileges, enforce trust boundaries and conditional access." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore IAM to validated state", "detail": "Ensure all roles and users are approved, tagged and documented." },
+          { "action": "Monitor for re-creation attempts", "detail": "Alert on reappearance of similarly named or structured accounts." },
+          { "action": "Enable Just-In-Time access (if possible)", "detail": "Reduce standing privileges by enforcing approval-based access grants." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Determine how the backdoor account was missed and what led to its creation." },
+          { "action": "Strengthen account governance", "detail": "Enforce stricter controls on IAM provisioning and lifecycle." },
+          { "action": "Update cloud detection rules", "detail": "For new user/role creation, abnormal access patterns and trust abuse." }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-07",
+    "title": "Unauthorised Access via Misconfigured Reverse Proxies",
+    "category": "Network Security",
+    "severity": "High",
+    "scenario": "An attacker exploits a misconfigured reverse proxy (e.g., Nginx, Apache, HAProxy, Cloudflare Tunnel, etc.) to gain access to protected internal services. This may include path traversal, bypassing authentication headers or proxying requests to sensitive resources.",
+    "detection": "WAF Logs, Reverse Proxy Logs, SIEM, IDS/IPS, EDR, Threat Intelligence.",
+    "mitre": "T1133 (External Remote Services), T1071.001 (Web Protocols), T1190 (Exploit Public-Facing Application.",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Review reverse proxy configs", "detail": "Enforce proper access controls, path whitelisting and header validation." },
+          { "action": "Deploy WAF and IPS in front of proxies", "detail": "Detect and block suspicious or malformed HTTP requests." },
+          { "action": "Harden authentication headers", "detail": "Prevent header spoofing (X-Forwarded-For, X-Original-URL, etc." }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Proxy request to unauthorised path, unusual upstream calls or WAF rule hit." },
+          { "action": "Review proxy access logs", "detail": "Identify offending request patterns, headers, source IPs and targeted resources." },
+          { "action": "Verify if auth bypass occurred", "detail": "Check for access to /admin, /internal or metadata endpoints." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Disable affected proxy route or server block", "detail": "Immediately stop access to the exposed path or subdomain." },
+          { "action": "Block malicious IPs and request patterns", "detail": "Through WAF, firewall or proxy-level filtering." },
+          { "action": "Enable stricter access control rules", "detail": "Require authentication on all paths, validate upstream headers." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Fix proxy configuration", "detail": "Apply strict path mappings, authentication enforcement and remove wildcard routes." },
+          { "action": "Patch backend services", "detail": "If accessed, ensure they are not vulnerable or misconfigured." },
+          { "action": "Audit for persistence attempts", "detail": "Look for shell uploads, command injection or beaconing from exposed apps." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Test fixed proxy configuration", "detail": "Validate against bypass attempts and confirm access control enforcement." },
+          { "action": "Monitor exposed services", "detail": "Apply enhanced logging and alerts for newly accessible endpoints." },
+          { "action": "Resume normal access", "detail": "Only after validation of full remediation and test passes." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Identify how the misconfiguration occurred (manual error, misaligned deployment, IaC bug." },
+          { "action": "Update DevOps processes", "detail": "Enforce config reviews for reverse proxy changes and route additions." },
+          { "action": "Train engineers", "detail": "On secure reverse proxy patterns, header validation and zero trust enforcement." }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-08",
+    "title": "Man-in-the-Middle (MitM) in Hybrid Environments",
+    "category": "Network Security",
+    "severity": "Critical",
+    "scenario": "An attacker positions themselves between endpoints and backend systems (e.g., VPN gateway, database, SaaS interface) to eavesdrop, tamper with or redirect data. This can occur via rogue Wi-Fi, DNS spoofing, ARP poisoning, malicious proxies or compromised edge devices.",
+    "detection": "NDR, EDR/XDR, DNS Logs, Proxy Logs, VPN Logs, SIEM, User Reports.",
+    "mitre": "T1557.002 (ARP Cache Poisoning), T1557.001 (LLMNR/NBT-NS Poisoning), T1040 (Network Sniffing), T1557.003 (DHCP Spoofing.",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enforce TLS 1.2+ everywhere", "detail": "Ensure encryption for all internal and external traffic." },
+          { "action": "Deploy NDR and SSL inspection", "detail": "Detect anomalies in handshake behaviours and certificates." },
+          { "action": "Apply DNS security controls", "detail": "Enable DNSSEC, secure forwarders and internal DNS monitoring." },
+          { "action": "Harden VPN configurations", "detail": "Disable split tunnelling and enforce certificate-based authentication." }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Suspicious SSL certificate, duplicate IP/MAC behaviour or DNS poisoning indicators." },
+          { "action": "Identify affected assets", "detail": "Map out which endpoints, services or users are impacted." },
+          { "action": "Correlate with network path", "detail": "Determine whether traffic is being intercepted in transit (Wi-Fi, proxy, VPN gateway." },
+          { "action": "Extract MitM indicators", "detail": "Unusual certificate issuers, dropped or altered packets, rogue DNS resolutions." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Isolate affected endpoint(s) or subnet", "detail": "Immediately remove from network if compromise confirmed." },
+          { "action": "Block rogue infrastructure", "detail": "Using NAC, firewall rules and DNS filtering." },
+          { "action": "Disable unverified proxy or split-tunnel VPN traffic", "detail": "Force all traffic through secure gateways." },
+          { "action": "Notify network and cloud teams", "detail": "Begin network tracing and forensic packet capture." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove malicious proxy, rogue access point or poisoned route", "detail": "Confirm through manual validation or network tools." },
+          { "action": "Reconfigure trust anchors", "detail": "Update CA stores and TLS pinning if certificates were spoofed." },
+          { "action": "Reset VPN and proxy configurations", "detail": "For users and services connected during the attack window." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore secure connectivity", "detail": "Confirm route integrity, encrypted sessions and DNS correctness." },
+          { "action": "Monitor impacted endpoints", "detail": "For post-compromise behaviour or backdoors." },
+          { "action": "Re-deploy compromised workloads", "detail": "In clean environments with validated infrastructure paths." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Identify entry point: rogue DHCP, user error, outdated cert, device compromise." },
+          { "action": "Enhance MitM detection capabilities", "detail": "Strengthen NDR rules, alerting logic and SSL cert validation." },
+          { "action": "Train staff", "detail": "On Wi-Fi safety, VPN misuse and endpoint hygiene." },
+          { "action": "Share insights with peers", "detail": "Internally and externally (via ISAC, threat sharing alliances." }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-09",
+    "title": "Session Hijacking via Token Replay",
+    "category": "Identity Security",
+    "severity": "High",
+    "scenario": "An attacker captures a valid session token (e.g., JWT, OAuth, SAML, browser cookie) and reuses it to impersonate a legitimate user. This can occur through phishing, malware, MitM, exposed tokens in code/repos or poorly secured session management.",
+    "detection": "SIEM, CASB, EDR, Cloud Logs (e.g., Azure AD, Google Workspace, Okta), Browser Telemetry, User Reports.",
+    "mitre": "T1539 (Steal Web Session Cookie), T1078 (Valid Accounts), T1550.004 (Web Session Cookie Reuse.",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Use short-lived tokens with refresh flow", "detail": "Enforce token TTLs and rotation." },
+          { "action": "Bind sessions to user context", "detail": "Device fingerprinting, IP range, browser metadata." },
+          { "action": "Implement anomaly detection", "detail": "Trigger alerts for session reuse from unusual geos or user agents." },
+          { "action": "Secure session storage", "detail": "Avoid placing tokens in local storage or URLs." }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Same session/token used across multiple geolocations/devices or with impossible travel patterns." },
+          { "action": "Analyse session metadata", "detail": "IP address, location, user agent, timestamp and action performed." },
+          { "action": "Correlate with user activity", "detail": "Check whether the real user was active during the suspicious access." },
+          { "action": "Validate token scope and use", "detail": "Identify what services were accessed and if any data was modified or downloaded." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Invalidate active session tokens", "detail": "Force logouts for the affected user across all services." },
+          { "action": "Block suspicious IPs or user agents", "detail": "Using WAF, CASB or firewall rules." },
+          { "action": "Lock user account temporarily", "detail": "If compromise is confirmed or suspected." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Reset user credentials and MFA tokens", "detail": "If identity compromise is suspected." },
+          { "action": "Remove malware or web skimmers", "detail": "If token was stolen from the endpoint or browser." },
+          { "action": "Patch affected apps", "detail": "That expose tokens in URLs, logs or insecure cookies." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Re-enable user account", "detail": "After re-authentication and endpoint validation." },
+          { "action": "Monitor post-recovery activity", "detail": "For suspicious behaviour or persistent threats." },
+          { "action": "Review all affected services", "detail": "For signs of lateral movement or abuse of elevated access." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Identify how and where the token was leaked or intercepted." },
+          { "action": "Enforce secure session design", "detail": "Include token binding, CSRF protections and client-side storage review." },
+          { "action": "Improve detection logic", "detail": "For unusual session patterns, browser/user-agent mismatches." }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-10",
+    "title": "Lateral Movement from SaaS to On-Prem via Federated Identity",
+    "category": "Identity Security",
+    "severity": "Critical",
+    "scenario": "An attacker compromises a cloud/SaaS account (e.g., Microsoft 365, Okta) and uses identity federation (e.g., SAML, OAuth, SCIM) to gain access to on-premise resources like VPNs, legacy apps, file shares or domain-joined systems. This exploits the trust relationship between identity providers and service providers[cite: 282, 283].",
+    "detection": "SIEM, Identity Logs (Azure AD, Okta, etc.), VPN Logs, EDR, LDAP Logs, On-Prem Authentication Logs[cite: 285].",
+    "mitre": "T1078.004 (Cloud Accounts), T1550.002 (Use of Cloud Identity Federation), T1071.001 (Web Protocols)[cite: 291].",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enforce conditional access policies", "detail": "Apply geolocation, device and risk-based restrictions[cite: 288]." },
+          { "action": "Use MFA for federated accounts", "detail": "Especially for high-privilege and hybrid access users[cite: 288]." },
+          { "action": "Log federation events across environments", "detail": "Track logins, token issuance and SAML assertions[cite: 288]." },
+          { "action": "Limit federation scope", "detail": "Only allow federation for necessary services or groups[cite: 288]." }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Unusual login from federated SaaS account into on-premise service (e.g., VPN, RDP, legacy app)[cite: 290]." },
+          { "action": "Analyse login path", "detail": "Determine if lateral movement occurred through SAML assertions, SCIM sync or OAuth token forwarding[cite: 290]." },
+          { "action": "Check for device and IP anomalies", "detail": "Identify mismatches between device posture and access level granted[cite: 291]." },
+          { "action": "Review directory sync logs", "detail": "Identify whether user groups, attributes or roles were manipulated[cite: 291]." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Disable federated identity access", "detail": "Temporarily block the affected account or federation trust path[cite: 293]." },
+          { "action": "Invalidate sessions and tokens", "detail": "Revoke SAML assertions, OAuth tokens and refresh tokens[cite: 293]." },
+          { "action": "Restrict on-prem access via firewall or ACLS", "detail": "Block federated users from internal segments during investigation[cite: 293]." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Reset credentials and MFA", "detail": "For compromised federated accounts[cite: 295]." },
+          { "action": "Correct federation mappings", "detail": "Remove or adjust risky role mappings, attribute assertions and SSO integrations[cite: 295]." },
+          { "action": "Remove any sync manipulation", "detail": "Roll back malicious SCIM provisioning or directory sync changes[cite: 295]." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore federation connectivity", "detail": "After all trust and role assertions are validated and hardened[cite: 297]." },
+          { "action": "Re-enable user access", "detail": "After credentials are reset and device posture confirmed[cite: 297]." },
+          { "action": "Monitor for re-pivot attempts", "detail": "Set up SIEM rules and behaviour analytics for hybrid identity access[cite: 297]." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Determine how the federation channel was abused (token theft, role misconfiguration, SCIM misuse)[cite: 299]." },
+          { "action": "Harden identity federation policy", "detail": "Require stronger verification on trust relationships and dynamic provisioning[cite: 299]." },
+          { "action": "Train admins", "detail": "On secure federation design, SSO security and sync monitoring[cite: 299]." }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-11",
+    "title": "Data Exfiltration via Encrypted DNS Tunnels (DoH/DoT)",
+    "category": "Network Security",
+    "severity": "High",
+    "scenario": "An attacker uses encrypted DNS tunnelling (e.g., DoH or DoT) to exfiltrate sensitive data from compromised endpoints. These methods encrypt DNS queries and responses, making it harder for traditional DNS monitoring solutions to detect command-and-control (C2) or data exfiltration channels[cite: 319].",
+    "detection": "NDR, EDR/XDR, DNS Proxy Logs, TLS Fingerprinting, Threat Intelligence, SIEM[cite: 321].",
+    "mitre": "T1071.004 (Application Layer Protocol: DNS), T1048 (Exfiltration Over Alternative Protocol), T1090.003 (Multi-Stage Channels)[cite: 327].",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Block unauthorised DoH/DOT resolvers", "detail": "Enforce DNS resolution through enterprise DNS servers only[cite: 324]." },
+          { "action": "Deploy TLS fingerprinting (JA3/JA3S)", "detail": "Detect unique signatures of known tunnelling tools[cite: 324]." },
+          { "action": "Monitor for known DoH providers", "detail": "Such as Cloudflare, Google and Mozilla over non-standard ports[cite: 324]." }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "High volume of DoH/DoT traffic from non-browser processes or unknown endpoints[cite: 326]." },
+          { "action": "Analyse JA3/JA3S hashes", "detail": "Match TLS fingerprints with known tunnelling tools (e.g., iodine, dns2tcp, dnscat2)[cite: 326]." },
+          { "action": "Review data volume and frequency", "detail": "Look for tunnelling patterns such as periodic bursts or encoded payloads[cite: 327]." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Isolate the affected endpoint", "detail": "Remove from the network to stop ongoing exfiltration[cite: 329]." },
+          { "action": "Block specific DoH/DoT endpoints", "detail": "At firewall or proxy level using domain and IP filtering[cite: 329]." },
+          { "action": "Disable outbound DNS to unauthorised servers", "detail": "Enforce policy-based DNS routing[cite: 329]." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove tunnelling malware or scripts", "detail": "From infected endpoint(s) after full forensic review[cite: 331]." },
+          { "action": "Patch system vulnerabilities", "detail": "That allowed malware to establish persistence or outbound comms[cite: 331]." },
+          { "action": "Rotate credentials and revoke tokens", "detail": "If any were exposed or exfiltrated through the tunnel[cite: 331]." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore endpoint connectivity", "detail": "After full validation of threat removal and secure configuration[cite: 333]." },
+          { "action": "Resume normal DNS resolution", "detail": "Through enterprise-approved servers with inspection enabled[cite: 333]." },
+          { "action": "Review access logs for data leakage", "detail": "Determine what information may have been exposed[cite: 333]." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Identify how tunnelling tool was deployed and evaded detection[cite: 335]." },
+          { "action": "Improve DNS monitoring policies", "detail": "Include encrypted DNS inspection and usage analytics[cite: 335]." },
+          { "action": "Update SIEM/NDR detection logic", "detail": "For encrypted tunnels, JA3 signatures and high-entropy DNS traffic[cite: 335]." }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-12",
+    "title": "Business Email Compromise via OAuth App Abuse",
+    "category": "Identity Security",
+    "severity": "Critical",
+    "scenario": "An attacker tricks a user into authorising a malicious OAuth application, which then gains API-level access to read emails, send messages or access files, bypassing traditional MFA and login detection[cite: 347].",
+    "detection": "Microsoft 365 Audit Logs, Google Workspace Logs, CASB, SIEM, Identity Provider Logs (Azure AD, Okta)[cite: 349].",
+    "mitre": "T1528 (Steal Access Token), T1078.004 (Cloud Accounts), T1550.003 (OAuth Token Abuse)[cite: 355].",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Restrict third-party OAuth apps", "detail": "Only allow pre-approved or consented apps for enterprise users[cite: 352]." },
+          { "action": "Enable OAuth app governance", "detail": "Via Defender for Cloud Apps (CASB), Google Workspace Admin or Okta[cite: 352]." },
+          { "action": "Audit app permission grants", "detail": "Alert on excessive scopes (e.g., Mail.ReadWrite, Files.Read.All)[cite: 352]." }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "OAuth app registered with risky scopes or user behaviour anomaly in email activity[cite: 354]." },
+          { "action": "Identify affected user and app", "detail": "Use audit logs to trace consent timestamp, scopes granted and app ID[cite: 354]." },
+          { "action": "Review API access logs", "detail": "Look for malicious read/send actions (e.g., forwarding rules, internal recon, exfiltration)[cite: 354]." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Revoke the malicious app's token", "detail": "Via identity provider or Microsoft 365 security portal[cite: 357]." },
+          { "action": "Disable affected account temporarily", "detail": "If malicious actions are confirmed[cite: 357]." },
+          { "action": "Block app registration (App ID, publisher)", "detail": "At tenant-wide level via admin policies[cite: 357]." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove persistence mechanisms", "detail": "Delete forwarding rules, inbox rules and sharing links created by the app[cite: 359]." },
+          { "action": "Reset OAuth tokens and refresh credentials", "detail": "Invalidate all active authorisations for the user[cite: 359]." },
+          { "action": "Harden tenant-wide OAuth policies", "detail": "Block user consent for risky scopes or external apps[cite: 359]." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore account access", "detail": "After confirming account integrity and revoking malicious access[cite: 361]." },
+          { "action": "Reinstate legitimate apps", "detail": "Reconnect necessary services after re-approval through secured processes[cite: 361]." },
+          { "action": "Monitor account post-recovery", "detail": "Enhanced logging and alerts for 14-30 days[cite: 361]." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Identify how the app was authorised and if multiple users were affected[cite: 365]." },
+          { "action": "Improve OAuth hygiene", "detail": "Enforce tighter controls on app registration and consent processes[cite: 365]." },
+          { "action": "Train users and admins", "detail": "On identifying fake app pop-ups and consent phishing attacks[cite: 365]." }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-13",
+    "title": "Destructive Malware in Hybrid Active Directory Environments",
+    "category": "Endpoint Security",
+    "severity": "Critical",
+    "scenario": "A destructive malware attack (e.g., wiper, ransomware) impacts both on-premise AD and Azure AD-integrated environments, aiming to cause maximum disruption by disabling domain controllers, corrupting authentication systems, or deleting critical files[cite: 377].",
+    "detection": "EDR/XDR, SIEM, Domain Controller Logs, DNS Logs, Azure AD Logs, Threat Intel Feeds[cite: 379].",
+    "mitre": "T1485 (Data Destruction), T1486 (Data Encrypted for Impact), T1489 (Service Stop), T1078 (Valid Accounts), T1021.002 (SMB/Windows Admin Shares)[cite: 385].",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Isolate and monitor critical DCs", "detail": "Apply strict segmentation and behavioural monitoring[cite: 382]." },
+          { "action": "Backup AD and Azure AD configurations", "detail": "Securely and regularly back up domain controllers and GPOs[cite: 382]." },
+          { "action": "Deploy tamper-proof EDR on domain controllers", "detail": "Ensure visibility and rollback options[cite: 382]." }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Sudden shutdown of DCs, GPO deletion, mass file encryption or process tampering on critical systems[cite: 384]." },
+          { "action": "Identify initial access vector", "detail": "Phishing, RDP brute force, misused credentials or software supply chain[cite: 384]." },
+          { "action": "Trace malware propagation", "detail": "Review lateral movement paths, PsExec use, SMB or WMI remoting[cite: 384]." },
+          { "action": "Correlate with known threat signatures", "detail": "Match binaries or behaviours to known destructive malware (e.g., HermeticWiper, NotPetya, ZeroCleare)[cite: 385]." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Disconnect infected hosts", "detail": "Immediately isolate affected endpoints, especially domain controllers[cite: 387]." },
+          { "action": "Disable compromised accounts", "detail": "Including any with replication rights or admin privileges[cite: 387]." },
+          { "action": "Quarantine affected VLANs", "detail": "To prevent cross-segment propagation[cite: 387]." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove malware binaries and persistence mechanisms", "detail": "Clean up scheduled tasks, registry entries and startup folders[cite: 389]." },
+          { "action": "Rebuild destroyed systems", "detail": "From clean backups, starting with DCs and critical infrastructure[cite: 389]." },
+          { "action": "Patch exploited vulnerabilities", "detail": "Across all endpoints involved in initial access or escalation[cite: 389]." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore AD and DNS from verified backups", "detail": "Test integrity before bringing online[cite: 391]." },
+          { "action": "Reconnect systems in phases", "detail": "Validate clean state and behaviour[cite: 391]." },
+          { "action": "Re-enable identity federation", "detail": "Only after ensuring no token or key material was leaked[cite: 391]." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct full RCA", "detail": "Include attack path, security gaps and delay factors[cite: 393]." },
+          { "action": "Enhance segmentation and least privilege", "detail": "Especially in hybrid identity systems[cite: 394]." },
+          { "action": "Update incident playbooks and backups", "detail": "With gaps discovered during the attack[cite: 394]." }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-14",
+    "title": "Ransomware Targeting Cloud Storage Buckets",
+    "category": "Cloud Security",
+    "severity": "Critical",
+    "scenario": "An attacker gains access to a cloud account with privileges to manage storage buckets (e.g., Amazon S3, Azure Blob, GCP Cloud Storage). They encrypt, overwrite or delete files or apply ransomware tactics via scripting tools to demand payment[cite: 406].",
+    "detection": "CloudTrail (AWS), Azure Activity Logs, GCP Audit Logs, SIEM, CASB, Threat Intel, Backup Alerts[cite: 408].",
+    "mitre": "T1486 (Data Encrypted for Impact), T1530 (Data from Cloud Storage Object), T1203 (Exploitation for Client Execution - e.g., script abuse)[cite: 414].",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enable versioning & object lock", "detail": "On cloud buckets to protect against deletion and unauthorised overwrites[cite: 411]." },
+          { "action": "Use least privilege IAM roles", "detail": "Avoid giving 's3:DeleteObject' or 'storage.objects.delete' to all users[cite: 411]." },
+          { "action": "Monitor cloud storage APIs", "detail": "Alert on bulk operations (PUT, DELETE, COPY) or anomalies in access patterns[cite: 411]." }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Bulk deletion or encryption-like write patterns detected from user/API[cite: 413]." },
+          { "action": "Identify affected buckets", "detail": "Check logs for timestamps, user agents, IPs and modified file paths[cite: 413]." },
+          { "action": "Investigate access vector", "detail": "Was access via leaked credentials, compromised IAM role or OAuth token?[cite: 413]." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Revoke credentials or API keys", "detail": "Disable access to prevent further write/delete actions[cite: 416]." },
+          { "action": "Detach risky IAM policies", "detail": "Remove affected role's access to sensitive buckets immediately[cite: 416]." },
+          { "action": "Quarantine account/session", "detail": "Use identity provider controls or cloud quarantine functions[cite: 416]." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove rogue scripts, users or automation jobs", "detail": "Check for scheduled tasks or compromised pipelines[cite: 418]." },
+          { "action": "Patch IAM misconfigurations", "detail": "Harden trust relationships and eliminate broad write permissions[cite: 418]." },
+          { "action": "Reconfigure API access controls", "detail": "Enforce MFA and conditional access on all cloud accounts[cite: 418]." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore from clean backups or object versions", "detail": "Use versioning or offsite backups stored securely[cite: 420]." },
+          { "action": "Validate restored data integrity", "detail": "Run file hash checks, audit access and verify content accuracy[cite: 420]." },
+          { "action": "Re-enable operations with hardened access", "detail": "Re-grant permissions only after validation and hardening steps[cite: 420]." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Determine how the attacker gained access and why controls failed[cite: 422]." },
+          { "action": "Enforce better segmentation", "detail": "Separate production, staging and backup storage by IAM boundary[cite: 422]." },
+          { "action": "Train DevOps teams", "detail": "On proper permission scoping, key rotation and API auditing[cite: 422]." }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-15",
+    "title": "Insider Data Theft via Unmanaged Personal Cloud Apps",
+    "category": "Insider Threat",
+    "severity": "High",
+    "scenario": "An employee uploads confidential or sensitive files to their personal cloud storage accounts (e.g., Google Drive, Dropbox). This may be intentional or accidental, often bypassing traditional network DLP solutions[cite: 435].",
+    "detection": "CASB, DLP, Proxy Logs, EDR, SIEM, UEBA, Endpoint Monitoring, Shadow IT Discovery Tools[cite: 437].",
+    "mitre": "T1041 (Exfiltration Over C2 Channel), T1537 (Transfer Data to Cloud Account), T1081 (Credentials in Files)[cite: 443].",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Deploy CASB or inline proxy", "detail": "Detect and block uploads to personal cloud storage domains[cite: 440]." },
+          { "action": "Use Endpoint DLP", "detail": "To monitor clipboard, USB, print and browser-based file transfers[cite: 440]." },
+          { "action": "Enforce allowlists", "detail": "Only permit corporate-approved cloud storage apps on managed endpoints[cite: 440]." }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "File upload detected to a domain associated with personal cloud apps (e.g., drive.google.com)[cite: 442]." },
+          { "action": "Identify the user and host", "detail": "Map network or endpoint logs to specific user, device and location[cite: 442]." },
+          { "action": "Analyse file metadata", "detail": "Check for sensitivity labels, document titles, classification, size and upload method[cite: 442]." },
+          { "action": "Determine intent", "detail": "Was it part of work activity, negligence or deliberate exfiltration?[cite: 443]." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Isolate or monitor the user session", "detail": "Depending on severity and insider policy (e.g., soft lock, silent logging)[cite: 445]." },
+          { "action": "Block access to target cloud domains", "detail": "Via proxy, firewall or CASB[cite: 445]." },
+          { "action": "Revoke sync tool authorisations", "detail": "If installed or configured on endpoint (e.g., Dropbox client)[cite: 445]." },
+          { "action": "Alert insider risk or HR team", "detail": "For joint investigation and potential legal follow-up[cite: 445]." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove unauthorised tools", "detail": "From user workstation (e.g., remove browser extensions, sync clients)[cite: 447]." },
+          { "action": "Disable browser access", "detail": "To known unsanctioned cloud storage services via proxy policy[cite: 447]." },
+          { "action": "Recover exfiltrated data if possible", "detail": "Request takedown via legal or use cloud app API[cite: 447]." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Re-enable system access", "detail": "After verifying system is clean and user access restrictions are appropriate[cite: 449]." },
+          { "action": "Enforce strict usage policies", "detail": "Require future uploads to go through DLP gateways or sanctioned apps only[cite: 449]." },
+          { "action": "Reinforce employee awareness", "detail": "Conduct targeted security awareness for user/team involved[cite: 449]." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Why was unsanctioned upload possible (tool misconfig, DLP bypass, policy gap)?[cite: 451]." },
+          { "action": "Tune detection rules", "detail": "For new upload behaviours, domains and endpoints[cite: 452]." },
+          { "action": "Review insider threat program", "detail": "Update thresholds, response procedures and escalation matrix[cite: 452]." }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-16",
+    "title": "Supply Chain Compromise via Third-Party Software Updates",
+    "category": "Supply Chain",
+    "severity": "Critical",
+    "scenario": "A trusted software vendor is compromised and attackers inject malicious code into legitimate software updates (e.g., MSI, EXE, script, DLL). The malware is distributed automatically via update channels, affecting multiple endpoints in the organisation[cite: 464, 465].",
+    "detection": "EDR/XDR, SIEM, Threat Intelligence, Endpoint Logs, File Integrity Monitoring, Vendor Alerts[cite: 468].",
+    "mitre": "T1195.002 (Supply Chain Compromise), T1059 (Command & Scripting), T1218 (Signed Binary Proxy Execution)[cite: 474].",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Maintain SBOM (Software Bill of Materials)", "detail": "Track all third-party tools, dependencies and update paths[cite: 471]." },
+          { "action": "Implement allowlisting", "detail": "Only permit software execution from trusted sources and code-signed binaries[cite: 471]." },
+          { "action": "Monitor vendor advisory feeds", "detail": "Subscribe to threat intelligence and vendor incident feeds[cite: 471]." }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Post-update execution anomaly: unusual process, external communication or persistence mechanism[cite: 473]." },
+          { "action": "Identify affected software", "detail": "Verify software name, version, vendor and deployment scope[cite: 473]." },
+          { "action": "Correlate indicators", "detail": "Check hashes, C2 domains, file paths, lateral movement or privilege escalation behaviour[cite: 473]." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Isolate affected hosts", "detail": "Prioritise endpoints that installed the compromised update[cite: 476]." },
+          { "action": "Block update package hashes and file paths", "detail": "Prevent further execution or propagation[cite: 476]." },
+          { "action": "Disable automated updates", "detail": "Temporarily halt update processes for the specific vendor/software[cite: 476]." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove backdoored components", "detail": "Use EDR to identify and remove persistence mechanisms, trojans or altered binaries[cite: 478]." },
+          { "action": "Replace with clean software versions", "detail": "Deploy verified versions of the application after vetting[cite: 478]." },
+          { "action": "Rotate credentials and tokens", "detail": "If affected software had access to sensitive environments or APIs[cite: 478]." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore systems from trusted backups", "detail": "For high-risk hosts if system integrity is uncertain[cite: 480]." },
+          { "action": "Re-enable trusted update channels", "detail": "Only after full validation of the new versions[cite: 480]." },
+          { "action": "Reassess third-party software policy", "detail": "Evaluate whether to continue using the affected vendor[cite: 480]." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Identify how the backdoored software reached the network and bypassed controls[cite: 484]." },
+          { "action": "Strengthen software validation process", "detail": "Include code-signing validation, sandbox testing and digital signatures[cite: 484]." },
+          { "action": "Update vendor risk policy", "detail": "Ensure vendors meet minimum security and update transparency standards[cite: 484]." }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-17",
+    "title": "Malware-Laced PDF Uploads to Public Portals",
+    "category": "Endpoint Security",
+    "severity": "High",
+    "scenario": "An attacker uploads a PDF file containing embedded malware (e.g., macro, JavaScript, shellcode) to a legitimate online portal hosted by the organisation. Internal staff later downloads and opens the file, triggering code execution[cite: 494, 495].",
+    "detection": "EDR/XDR, Web Application Firewall (WAF), Antivirus Alerts, Sandbox Analysis, SIEM[cite: 497].",
+    "mitre": "T1203 (Exploitation for Client Execution), T1059 (Command & Scripting Interpreter), T1566.001 (Phishing: Spearphishing Attachment)[cite: 503].",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Implement file upload scanning", "detail": "Use antivirus or sandbox to scan all uploads at the perimeter[cite: 500]." },
+          { "action": "Apply file type restrictions", "detail": "Allow only specific file types and scan file content[cite: 500]." },
+          { "action": "Configure sandbox detonation", "detail": "Automatically detonate all uploaded PDFs before user access[cite: 500]." }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "EDR detects PDF-based payload execution or sandbox flags file as malicious[cite: 502]." },
+          { "action": "Identify source of PDF", "detail": "Check upload logs and portal submission metadata (IP, email, time)[cite: 502]." },
+          { "action": "Analyse payload behaviour", "detail": "Determine if it used embedded macros, exploit kits or dropped files[cite: 502]." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Isolate affected endpoint(s)", "detail": "Immediately quarantine any host that opened the malicious PDF[cite: 505]." },
+          { "action": "Block file hash across systems", "detail": "Prevent further download/execution of the same file[cite: 505]." },
+          { "action": "Disable portal file link", "detail": "Remove access to the uploaded file for other users[cite: 505]." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove malware and dropped artefacts", "detail": "Delete suspicious registry entries, files and persistence mechanisms[cite: 507]." },
+          { "action": "Clean user mailbox and shared folders", "detail": "If file was emailed or stored elsewhere internally[cite: 507]." },
+          { "action": "Patch vulnerable PDF viewers or document software", "detail": "That allowed exploit execution[cite: 507]." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore endpoint from backup or validate cleanup", "detail": "Ensure clean baseline before reconnecting to network[cite: 509]." },
+          { "action": "Re-enable access to portal if safe", "detail": "After upload filters and scanning tools are confirmed functional[cite: 509]." },
+          { "action": "Monitor user and system", "detail": "For post-incident anomalies over next 1-2 weeks[cite: 509]." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Review upload validation process", "detail": "Was the file scanning or extension check bypassed?[cite: 511]." },
+          { "action": "Improve sandbox integration", "detail": "Ensure full detonation coverage and alert enrichment in SIEM[cite: 511]." },
+          { "action": "Create detection signatures", "detail": "For similar PDF payloads using YARA, regex or EDR rules[cite: 511]." }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-18",
+    "title": "Account Takeover via Legacy Authentication Protocols",
+    "category": "Identity Security",
+    "severity": "High",
+    "scenario": "An attacker uses brute force, credential stuffing or stolen credentials to gain access to user accounts through legacy authentication protocols (IMAP, POP3, SMTP AUTH). These protocols often do not support MFA, allowing the attacker to bypass modern authentication policies[cite: 523, 524].",
+    "detection": "Identity Provider Logs (e.g., Azure AD Sign-In Logs), SIEM, Email Gateway Logs, CASB, EDR[cite: 526].",
+    "mitre": "T1078.004 (Valid Accounts: Cloud Accounts), T1110.003 (Credential Stuffing), T1056.001 (Input Capture: Keylogging)[cite: 532].",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Disable legacy protocols", "detail": "Globally block IMAP, POP3, SMTP AUTH unless explicitly required[cite: 529]." },
+          { "action": "Monitor authentication types", "detail": "Audit sign-ins using legacy protocols in SIEM or identity platforms[cite: 529]." },
+          { "action": "Enforce MFA for all users", "detail": "Including service accounts and users with mailbox access[cite: 529]." }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Sign-in via legacy protocol from suspicious IP or geo-location[cite: 531]." },
+          { "action": "Review authentication logs", "detail": "Identify IP address, user agent, protocol and success/failure rates[cite: 531]." },
+          { "action": "Confirm successful login without MFA", "detail": "Indicating protocol bypass[cite: 531]." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Block malicious IPs", "detail": "At firewall, reverse proxy or conditional access policy level[cite: 534]." },
+          { "action": "Disable legacy protocol access", "detail": "For affected users and tenant-wide where possible[cite: 534]." },
+          { "action": "Reset credentials", "detail": "Immediately change the password for compromised accounts[cite: 534]." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Review and delete malicious email rules", "detail": "Such as forwarding rules or hidden inbox rules[cite: 536]." },
+          { "action": "Search for signs of exfiltration or abuse", "detail": "Sent items, unusual downloads, third-party integrations[cite: 536]." },
+          { "action": "Scan for persistence", "detail": "Rogue OAuth apps or backdoors installed via older protocols[cite: 536]." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Re-enable account with modern auth only", "detail": "After ensuring protocol lockout and MFA are enforced[cite: 538]." },
+          { "action": "Monitor user activity", "detail": "For anomalies over the next 7-14 days post-reset[cite: 538]." },
+          { "action": "Educate user", "detail": "On signs of account misuse, reporting procedures and personal device hygiene[cite: 538]." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Review protocol usage across the organisation", "detail": "Reduce attack surface by eliminating legacy protocol dependencies[cite: 540]." },
+          { "action": "Improve detection and alerting", "detail": "Add SIEM rules for legacy protocol sign-ins and impossible travel[cite: 541]." },
+          { "action": "Update security baselines", "detail": "Document which systems should or should not allow legacy protocols[cite: 541]." }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-19",
+    "title": "Data Tampering in Business-Critical Databases",
+    "category": "Data Security",
+    "severity": "High",
+    "scenario": "A threat actor, either an insider with privileged access or an external actor using compromised credentials, modifies, deletes or corrupts data in a critical database (e.g., ERP, CRM, HRMS) without authorisation[cite: 553, 554].",
+    "detection": "Database Activity Monitoring (DAM), SIEM, Application Logs, User Behaviour Analytics (UBA), Change Control Systems[cite: 557].",
+    "mitre": "T1071.001 (Application Layer Protocol: Web), T1556.002 (Modify Authentication Process), T1565.002 (Stored Data Manipulation)[cite: 563].",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enable full query logging", "detail": "On all production databases, especially those with sensitive records[cite: 560]." },
+          { "action": "Deploy DAM tools", "detail": "e.g., Imperva DAM, IBM Guardium, native MySQL/Azure audit[cite: 560]." },
+          { "action": "Implement strict RBAC", "detail": "Separate read, write and admin roles; monitor privileged users[cite: 560]." }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Anomalous query or data pattern detected (e.g., UPDATE salary SET..., DROP table or changes outside business hours)[cite: 562]." },
+          { "action": "Identify user, host and time", "detail": "Cross-reference with IAM logs and session metadata[cite: 562]." },
+          { "action": "Validate if change is authorised", "detail": "Check ticketing system or change request ID[cite: 562]." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Revoke or suspend user access", "detail": "Especially if privilege escalation or abuse is confirmed[cite: 565]." },
+          { "action": "Isolate database if needed", "detail": "If wider corruption or unauthorised changes are ongoing[cite: 565]." },
+          { "action": "Snapshot affected tables", "detail": "For forensic comparison before restoring clean data[cite: 565]." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove malicious queries/scheduled jobs", "detail": "Clean up rogue triggers, procedures or scripts[cite: 567]." },
+          { "action": "Revert unauthorised changes", "detail": "Use audit logs or backup to restore integrity[cite: 567]." },
+          { "action": "Patch database vulnerabilities", "detail": "If SQL injection or misconfig allowed access[cite: 567]." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore full data integrity", "detail": "Validate record accuracy post-rollback or patch[cite: 569]." },
+          { "action": "Resume operations with monitoring", "detail": "Enable heightened logging for impacted datasets/users[cite: 569]." },
+          { "action": "Document business impact", "detail": "Report on financial, operational or reputational damage[cite: 569]." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Perform full RCA", "detail": "Was this insider misuse, lateral movement or app-layer abuse?[cite: 571]." },
+          { "action": "Update alerting thresholds and rules", "detail": "Improve detection for slow or stealthy tampering patterns[cite: 571]." },
+          { "action": "Enhance database security posture", "detail": "Use column-level encryption, least privilege and deny-all by default[cite: 572]." }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-20",
+    "title": "DNS-Based C2 from Embedded IoT Devices",
+    "category": "IoT Security",
+    "severity": "High",
+    "scenario": "An attacker compromises an IoT or embedded device within the corporate environment. The device maintains persistent command-and-control (C2) communication using DNS tunnelling (e.g., via TXT, NULL, A records) to evade perimeter firewalls[cite: 583, 584].",
+    "detection": "NDR (e.g., Darktrace, Corelight), DNS Logs, SIEM, Firewall Logs, IoT Security Platform[cite: 586].",
+    "mitre": "T1071.004 (Application Layer Protocol: DNS), T1020 (Automated Exfiltration), T1086 (PowerShell for payload delivery if Windows IoT)[cite: 592].",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Segment IoT networks", "detail": "Use VLANs and firewalls to isolate IoT traffic from corporate networks[cite: 589]." },
+          { "action": "Monitor all DNS traffic", "detail": "Especially to unknown or dynamic domains from non-standard devices[cite: 589]." },
+          { "action": "Enforce DNS sinkholing", "detail": "Block known C2 and suspicious DNS resolvers using RPZ or firewall rules[cite: 589]." }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Unusual DNS queries detected from IoT device to external domain (e.g., long subdomains, spikes in DNS volume)[cite: 591]." },
+          { "action": "Analyse DNS query patterns", "detail": "Check for high entropy, beaconing or tunnelling behaviour[cite: 591]." },
+          { "action": "Identify the device and location", "detail": "Map MAC/IP to physical location and asset inventory[cite: 591]." },
+          { "action": "Validate payload indicators", "detail": "Are the DNS records exfiltrating encoded data (e.g., Base64, hex)?[cite: 592]." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Block DNS queries to malicious domains", "detail": "Via DNS firewall, RPZ or upstream DNS sinkhole[cite: 594]." },
+          { "action": "Isolate the device from the network", "detail": "At switch or NAC level to prevent further communication[cite: 594]." },
+          { "action": "Alert OT or IoT management teams", "detail": "Begin device-specific triage and inspection[cite: 594]." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Reflash firmware or factory reset", "detail": "If malware persistence is confirmed on the device[cite: 596]." },
+          { "action": "Remove rogue DNS resolver settings", "detail": "Ensure only corporate DNS resolvers are used[cite: 596]." },
+          { "action": "Clean up device credentials and backdoors", "detail": "If login portals or services were exposed externally[cite: 596]." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Reconnect device to isolated VLAN", "detail": "Only after ensuring clean state and full validation[cite: 598]." },
+          { "action": "Monitor DNS traffic from device", "detail": "For anomalies during post-reconnection period[cite: 598]." },
+          { "action": "Conduct functional testing", "detail": "Ensure operational use cases are not impacted by containment steps[cite: 598]." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Identify how the DNS tunnelling tool was deployed and evaded detection[cite: 600]." },
+          { "action": "Update DNS detection logic", "detail": "Enrich with entropy scoring, unusual record types, beaconing intervals[cite: 600]." },
+          { "action": "Review IoT security policies", "detail": "Mandate minimum patching, logging and isolation requirements[cite: 601]." }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-21",
+    "title": "Initial Access via Malicious Browser Extensions",
+    "category": "Endpoint Security",
+    "severity": "Medium to High",
+    "scenario": "An attacker tricks a user into installing a malicious browser extension (e.g., from a fake Chrome Web Store listing). Once installed, the extension gains access to cookies, credentials, session tokens, or can redirect the user's traffic, leading to data theft or further compromise. [cite: 614]",
+    "detection": "EDR, Browser Management Tools, CASB, Proxy Logs, UBA, SIEM. [cite: 616]",
+    "mitre": "T1176 (Browser Extensions), T1056.001 (Input Capture), T1556 (Modify Authentication Process). [cite: 622]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enforce managed browser policies", "detail": "Use enterprise controls to block unapproved extensions. [cite: 619]" },
+          { "action": "Monitor extension installations", "detail": "With endpoint or browser monitoring agents. [cite: 619]" },
+          { "action": "Allowlist trusted extensions", "detail": "Prevent installation of anything not explicitly approved. [cite: 619]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Suspicious browser behaviour detected (e.g., credential access, network redirection). [cite: 621]" },
+          { "action": "Identify affected user and host", "detail": "From browser telemetry, proxy logs or EDR alerts. [cite: 621]" },
+          { "action": "Investigate installed extensions", "detail": "Collect extension IDs, permissions, install sources and version. [cite: 621]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Remove the extension from browser", "detail": "Via browser management tools or manual cleanup. [cite: 624]" },
+          { "action": "Disconnect the endpoint from the internet", "detail": "If session hijacking or credential harvesting is suspected. [cite: 624]" },
+          { "action": "Revoke exposed session tokens", "detail": "In identity provider or affected SaaS platforms. [cite: 624]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Scan for persistence or malware", "detail": "Ensure the extension didn't drop files or add startup entries. [cite: 626]" },
+          { "action": "Clean browser profile", "detail": "Remove cached data, cookies, extension settings and saved passwords. [cite: 626]" },
+          { "action": "Reinstall browser in clean state", "detail": "If necessary, especially for unmanaged endpoints. [cite: 626]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Reset passwords for all accessed apps", "detail": "Especially if session tokens or autofilled credentials were exposed. [cite: 628]" },
+          { "action": "Reconnect to the network", "detail": "Once device is verified clean and extension removed. [cite: 628]" },
+          { "action": "Monitor user activity", "detail": "For continued misuse or shadow extensions reinstalled by user. [cite: 628]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Update browser security policy", "detail": "Consider switching to managed profiles or VDI with restricted browser access. [cite: 630]" },
+          { "action": "Add extension to blocklists or browser threat intel", "detail": "Share the extension ID hash and threat behaviour indicators. [cite: 630]" },
+          { "action": "Document the full compromise chain", "detail": "For audit and compliance reporting. [cite: 631]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-22",
+    "title": "Unauthorised Use of Offensive Security Tools in Internal Networks",
+    "category": "Endpoint Security",
+    "severity": "Critical",
+    "scenario": "An attacker, insider or red teamer runs offensive security tools (e.g., Mimikatz, Cobalt Strike, BloodHound, Empire) within the internal environment to extract credentials, perform recon, move laterally or establish command and control. [cite: 644, 645]",
+    "detection": "EDR/XDR, SIEM, Process Monitoring, Threat Intel, Sysmon, Network Traffic Analytics. [cite: 647]",
+    "mitre": "T1003 (OS Credential Dumping), T1059 (Command Execution), T1021 (Remote Services), T1105 (Ingress Tool Transfer). [cite: 653, 663]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Deploy EDR and behaviour-based detection", "detail": "Capable of flagging Mimikatz, Cobalt Strike beacons, etc. [cite: 650]" },
+          { "action": "Enable Sysmon or advanced logging", "detail": "Track command-line arguments, DLL loads, LSASS access. [cite: 650, 667]" },
+          { "action": "Create allowlist of known red team tools", "detail": "To differentiate sanctioned exercises from real threats. [cite: 650]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Detection of known tool patterns (e.g., sekurlsa::logonpasswords, beacon.exe). [cite: 652]" },
+          { "action": "Identify host and user", "detail": "Determine who executed the tool and on which endpoint. [cite: 652]" },
+          { "action": "Confirm red team vs threat actor", "detail": "Check if activity aligns with a scheduled test or unplanned use. [cite: 652]" },
+          { "action": "Analyse scope of access", "detail": "Determine if credentials were dumped, movement occurred or persistence established. [cite: 653]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Isolate the host from the network", "detail": "Immediately prevent lateral movement or beaconing. [cite: 655]" },
+          { "action": "Suspend involved user accounts", "detail": "If an insider threat or compromised account is suspected. [cite: 655]" },
+          { "action": "Block tool binaries and hashes", "detail": "In EDR, AV and NGFW platforms. [cite: 655]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove malicious binaries, scripts and persistence mechanisms", "detail": "e.g., scheduled tasks, WMI subscriptions, registry entries. [cite: 657]" },
+          { "action": "Re-image if system trust is broken", "detail": "Especially for domain controllers or admin workstations. [cite: 657]" },
+          { "action": "Rotate exposed credentials", "detail": "Prioritise privileged and service accounts affected. [cite: 657]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Reinstate users with strict monitoring", "detail": "Temporarily apply least privilege and behavioural watch. [cite: 659]" },
+          { "action": "Harden detection rules", "detail": "Improve detections using endpoint telemetry and network signatures. [cite: 659]" },
+          { "action": "Resume operations", "detail": "Once verified clean and logs reviewed for hidden persistence. [cite: 659]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct full RCA", "detail": "How was the tool introduced? USB, phishing, RDP session? [cite: 663]" },
+          { "action": "Tune and test new rules", "detail": "Against variants or obfuscated tools. [cite: 663]" },
+          { "action": "Run purple team exercises", "detail": "To validate controls and analyst readiness. [cite: 663]" },
+          { "action": "Update red team coordination SOP", "detail": "Ensure future test activities are pre-registered and whitelisted. [cite: 663]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-23",
+    "title": "Lateral Movement via Shared Cloud Drives",
+    "category": "Cloud Security",
+    "severity": "High",
+    "scenario": "An attacker with access to a compromised user account leverages corporate cloud storage services (e.g., Google Drive, OneDrive) to move laterally by sharing malicious files (e.g., macro-laced documents, weaponised PDFs) with other employees. [cite: 675]",
+    "detection": "CASB, SIEM, Identity Logs, Cloud Audit Logs, EDR, Email Security Gateway. [cite: 677]",
+    "mitre": "T1560.001 (Archive via Utility), T1203 (Exploit Client), T1105 (Ingress Tool Transfer). [cite: 684]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enforce file sharing policies", "detail": "Block sharing with external domains unless whitelisted. [cite: 681]" },
+          { "action": "Use CASB for visibility", "detail": "Detect unusual file sharing, download/upload spikes and excessive permissions. [cite: 681, 695]" },
+          { "action": "Apply DLP rules", "detail": "Prevent uploading of sensitive or executables via cloud drive. [cite: 681, 700]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Unusual sharing behaviour or malware detected in shared file. [cite: 683]" },
+          { "action": "Identify source account", "detail": "Determine who created/shared the file and from which endpoint/IP. [cite: 683]" },
+          { "action": "Analyse file content", "detail": "Use sandbox or static analysis to determine file behaviour. [cite: 683, 699]" },
+          { "action": "Review access logs", "detail": "Who viewed/downloaded or interacted with the file? [cite: 683]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Revoke shared file links", "detail": "In the cloud storage admin portal or via API. [cite: 686]" },
+          { "action": "Suspend involved user account(s)", "detail": "If sharing was unauthorised or malicious. [cite: 686]" },
+          { "action": "Quarantine endpoint", "detail": "Of user who uploaded or executed the malicious file. [cite: 686]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Delete malicious files", "detail": "From all shared drives, including personal and shared folders. [cite: 688]" },
+          { "action": "Remove malicious browser extensions or sync clients", "detail": "Used to automate sharing or file sync abuse. [cite: 688]" },
+          { "action": "Reset compromised accounts", "detail": "Ensure attackers cannot reuse cloud tokens or sessions. [cite: 688]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore from clean versions", "detail": "If important shared files were deleted or replaced. [cite: 690]" },
+          { "action": "Reconnect users", "detail": "After file access is validated and devices are clean. [cite: 690]" },
+          { "action": "Monitor cloud drive activity", "detail": "For suspicious post-incident behaviours. [cite: 690]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Update CASB/EDR/Email alerting rules", "detail": "For internal sharing anomalies and file abuse. [cite: 692]" },
+          { "action": "Review cloud app governance", "detail": "Only allow approved cloud storage platforms and disable legacy sync clients. [cite: 692]" },
+          { "action": "Conduct awareness training", "detail": "Focused on internal threat propagation and safe collaboration practices. [cite: 692]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-24",
+    "title": "Compromise via Misconfigured SaaS Integrations",
+    "category": "Cloud Security",
+    "severity": "High",
+    "scenario": "An attacker exploits a misconfigured SaaS integration (e.g., an unvetted OAuth app connected to Google Workspace, Microsoft 365, Salesforce or Slack) to access user accounts, read mail, extract files or interact with APIs on behalf of the user, bypassing MFA. [cite: 707]",
+    "detection": "CASB, Identity Logs, Cloud App Logs, SIEM, SaaS Security Posture Management (SSPM), OAuth App Audit Logs. [cite: 709]",
+    "mitre": "T1550.001 (Application Access Token), T1098.001 (Account Manipulation via OAuth), T1110.003 (Credential Access via OAuth Abuse). [cite: 715]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enable SaaS app governance", "detail": "Block unverified or high-risk OAuth apps by default. [cite: 712]" },
+          { "action": "Use CASB or SSPM tools", "detail": "To monitor and alert on new third-party app integrations. [cite: 712]" },
+          { "action": "Review and restrict OAuth scopes", "detail": "Allow minimal access (e.g., read-only) and monitor write/delete scopes. [cite: 712]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Unknown app granted access to sensitive services (e.g., Gmail, SharePoint, Slack DMs). [cite: 714]" },
+          { "action": "Identify affected user(s) and app", "detail": "Collect app name, OAuth scopes, install time, IP address, user agent. [cite: 714]" },
+          { "action": "Validate whether app is authorised", "detail": "Check SaaS admin panel or SSPM policy for unapproved apps. [cite: 714]" },
+          { "action": "Analyse app behaviour", "detail": "Look for download/export actions, mailbox access, drive listing or message posting. [cite: 715]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Revoke app access", "detail": "From affected user accounts or tenant-wide using the SaaS admin console. [cite: 717]" },
+          { "action": "Disable affected user accounts temporarily", "detail": "If persistent access was abused or impersonation is ongoing. [cite: 717]" },
+          { "action": "Block app via CASB or SSPM policies", "detail": "Prevent re-connection and future authorisation. [cite: 717]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove app tokens and refresh tokens", "detail": "Fully disconnect the app from account and revoke refresh privileges. [cite: 719]" },
+          { "action": "Check for downstream abuse", "detail": "Look for shared links, downloaded files or changed mail rules. [cite: 719]" },
+          { "action": "Audit other user accounts", "detail": "To detect whether the app was widely installed across users or groups. [cite: 719]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Resume user access after cleanup", "detail": "Ensure app is removed and no unauthorised behaviour persists. [cite: 721]" },
+          { "action": "Restore tampered data", "detail": "If the app deleted, altered or shared sensitive information. [cite: 721]" },
+          { "action": "Harden SaaS app policies", "detail": "Disable risky OAuth grant types and restrict high-scope apps to admins only. [cite: 721]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct full RCA", "detail": "How was the app authorised? Who installed it? Was it approved? [cite: 723]" },
+          { "action": "Strengthen SaaS onboarding process", "detail": "Add approval flows, risk scoring and app reviews. [cite: 723]" },
+          { "action": "Enforce app allowlisting", "detail": "Allow only specific pre-approved SaaS connectors. [cite: 723]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-25",
+    "title": "Privilege Escalation via Vulnerable Drivers",
+    "category": "Endpoint Security",
+    "severity": "Critical",
+    "scenario": "A threat actor executes a known vulnerable driver to exploit kernel-mode flaws, bypass endpoint protection or gain SYSTEM-level access on a compromised host. These drivers may be signed and appear legitimate, making detection difficult without behavioural monitoring. [cite: 733, 734]",
+    "detection": "EDR, Sysmon, Kernel Event Logs, SIEM, Vulnerability Management Tools, Exploit Protection Logs. [cite: 736]",
+    "mitre": "T1068 (Exploitation for Privilege Escalation), T1543.003 (Create or Modify System Process), T1547.006 (Kernel Modules and Extensions). [cite: 742]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enable driver blocklists", "detail": "Use Microsoft's kernel driver block policy via Defender for Endpoint. [cite: 739]" },
+          { "action": "Monitor signed driver loading events", "detail": "Use Sysmon Event ID 6 and EDR telemetry. [cite: 739, 755]" },
+          { "action": "Maintain list of banned hashes and filenames", "detail": "Based on threat intel and recent CVEs. [cite: 739]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Detection of known vulnerable driver loaded, abnormal kernel access or SYSTEM-level exploit. [cite: 741]" },
+          { "action": "Identify driver name and hash", "detail": "Check if the binary is signed, who installed it and when. [cite: 741]" },
+          { "action": "Correlate with suspicious behaviour", "detail": "e.g., disabling AV, creating SYSTEM-level accounts or writing to kernel memory. [cite: 741]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Isolate the affected host", "detail": "To prevent driver use in broader lateral escalation. [cite: 744]" },
+          { "action": "Kill associated processes", "detail": "Especially dropper processes or tools leveraging the driver. [cite: 744]" },
+          { "action": "Quarantine driver binary", "detail": "Use EDR or AV platform to contain the driver executable. [cite: 744]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove vulnerable driver and dependencies", "detail": "From System32\\drivers\\, registry service entries and startup configs. [cite: 746]" },
+          { "action": "Revoke trust for driver certificate", "detail": "Blocklist at EDR or Defender level. [cite: 746]" },
+          { "action": "Patch the host", "detail": "Apply kernel updates and security patches for related components. [cite: 746]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore from known good baseline", "detail": "If system integrity is compromised (e.g., kernel tampering). [cite: 748]" },
+          { "action": "Re-enable security controls", "detail": "That may have been disabled during the attack. [cite: 748]" },
+          { "action": "Validate with rootkit scanner", "detail": "Ensure no deep-level manipulation remains (e.g., GMER, CHKROOTKIT). [cite: 748]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Update detection logic", "detail": "Add rules for rare driver names, unsigned driver drops and rapid privilege changes. [cite: 752]" },
+          { "action": "Enforce allowlist for kernel drivers", "detail": "Through Device Control or application whitelisting tools. [cite: 752]" },
+          { "action": "Conduct blue team exercise", "detail": "Simulate similar escalation to test SOC visibility. [cite: 752]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-26",
+    "title": "Data Exposure via Misconfigured Cloud Storage",
+    "category": "Cloud Security",
+    "severity": "High",
+    "scenario": "An internal user or application misconfigures a cloud storage bucket (e.g., Amazon S3, Azure Blob Storage), unintentionally exposing confidential files such as Pll, source code or backups to the internet or to unauthorised internal users. [cite: 764] Attackers or researchers may discover and access these files. [cite: 765]",
+    "detection": "Cloud Security Posture Management (CSPM), SIEM, CASB, Threat Intel Feeds, External Reports.",
+    "mitre": "T1530 (Data from Cloud Storage Object), T1565.001 (Stored Data Manipulation). [cite: 773]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enforce storage encryption and access policies", "detail": "e.g., default deny, MFA for write access. [cite: 770]" },
+          { "action": "Use CSPM to continuously scan cloud configurations", "detail": "Identify public or over-permissive buckets. [cite: 770]" },
+          { "action": "Label sensitive data", "detail": "Apply classification and tagging for automated DLP. [cite: 770]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "CSPM or CASB flags publicly accessible bucket or weak ACL. [cite: 772]" },
+          { "action": "Identify exposed bucket and file types", "detail": "Confirm data sensitivity: PII, source code, credentials, etc. [cite: 772]" },
+          { "action": "Validate access logs", "detail": "Determine who accessed the data and when (if logging enabled). [cite: 772]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Revoke public access immediately", "detail": "Update ACLs or bucket policies to private. [cite: 775]" },
+          { "action": "Quarantine sensitive files", "detail": "Move to a secure location with limited access. [cite: 775]" },
+          { "action": "Block further uploads to exposed bucket", "detail": "Until full review is complete. [cite: 775]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Review all storage buckets", "detail": "Across the cloud environment for similar misconfigurations. [cite: 777]" },
+          { "action": "Apply encryption and versioning", "detail": "To reduce future exposure risk. [cite: 777]" },
+          { "action": "Patch automation scripts or IaC templates", "detail": "To avoid repeat misconfigurations. [cite: 777]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Validate all access controls", "detail": "Confirm no other cloud storage misconfigurations exist. [cite: 779]" },
+          { "action": "Restore files with proper permissions", "detail": "If access was temporarily disabled. [cite: 779]" },
+          { "action": "Re-enable access to necessary roles only", "detail": "Based on least privilege. [cite: 779]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Determine who created the misconfiguration and why it bypassed controls. [cite: 781]" },
+          { "action": "Improve IaC pipelines", "detail": "Include bucket security validation before deployment (e.g., Terraform with Sentinel). [cite: 781]" },
+          { "action": "Review and update cloud security baseline", "detail": "Apply stricter guardrails for storage creation. [cite: 782]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-27",
+    "title": "Insider Abuse of Monitoring or Admin Tools",
+    "category": "Insider Threat",
+    "severity": "High",
+    "scenario": "An insider with administrative access misuses legitimate tools such as Splunk, Active Directory tools, or security platforms to view sensitive user data, elevate privileges, create rogue accounts or disable logs, violating internal policies. [cite: 795]",
+    "detection": "SIEM, EDR, Privileged Access Management (PAM) Logs, UEBA, Audit Logs, Endpoint Logs. [cite: 796]",
+    "mitre": "T1087 (Account Discovery), T1078 (Valid Accounts), T1556 (Modify Authentication Process), T1003 (Credential Dumping). [cite: 803]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Implement least privilege", "detail": "Limit admin tool access to only what is required for each role. [cite: 800]" },
+          { "action": "Enable full audit logging", "detail": "Track all privileged tool access, changes and sensitive data views. [cite: 800]" },
+          { "action": "Deploy UEBA or insider threat detection", "detail": "Monitor for behavioural anomalies by privileged users. [cite: 800]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Unusual access patterns (e.g., off-hours logins, accessing HR records) or repeated privilege escalations. [cite: 802]" },
+          { "action": "Identify user and tool used", "detail": "Correlate PAM logs, AD logs and SIEM alerts. [cite: 802]" },
+          { "action": "Validate access context", "detail": "Check if this activity was part of an approved change, ticket or maintenance task. [cite: 802]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Suspend user account", "detail": "Immediately block further access to admin tools. [cite: 805]" },
+          { "action": "Isolate affected systems", "detail": "If changes were made that affect system integrity or visibility. [cite: 805]" },
+          { "action": "Notify HR and legal teams", "detail": "Insider threat cases may require coordinated internal response. [cite: 805]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove unauthorised changes", "detail": "Revert any account creations, log tampering or policy modifications. [cite: 807]" },
+          { "action": "Reset shared or reused credentials", "detail": "Especially if access tokens or service accounts were abused. [cite: 807]" },
+          { "action": "Audit tool configurations", "detail": "Ensure no lingering backdoors, rogue jobs or persistent scripts exist. [cite: 807]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore normal operations", "detail": "Only after full risk is mitigated and admin accounts are reviewed. [cite: 809]" },
+          { "action": "Reinstate tool access for other users", "detail": "With improved oversight and auditing in place. [cite: 809]" },
+          { "action": "Increase logging levels temporarily", "detail": "To monitor for any follow-up attempts or unnoticed abuse. [cite: 809]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA and internal review", "detail": "What controls failed? Was there insufficient oversight or segmentation? [cite: 813]" },
+          { "action": "Update admin access policies", "detail": "Include stricter monitoring and cross-functional approvals for sensitive actions. [cite: 813]" },
+          { "action": "Improve alerts for admin misuse", "detail": "Add rules for data exfiltration patterns, excessive queries and abnormal script use. [cite: 813]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-28",
+    "title": "Backdoor Persistence via Rogue Browser Update Mechanisms",
+    "category": "Endpoint Security",
+    "severity": "High",
+    "scenario": "An attacker lures a user to a compromised website or phishing page that prompts them to install a 'browser update.' Instead of a legitimate update, the user installs malware that creates a persistent backdoor, allowing remote access or data exfiltration. [cite: 822, 823]",
+    "detection": "EDR, DNS Logs, Proxy Logs, Firewall, SIEM, Sandbox Analysis Tools. [cite: 825]",
+    "mitre": "T1189 (Drive-by Compromise), T1059 (Command Execution), T1547 (Persistence via Registry/Scheduled Task), T1105 (Ingress Tool Transfer). [cite: 831]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enable endpoint protection with behaviour detection", "detail": "Capable of detecting post-install execution anomalies. [cite: 828]" },
+          { "action": "Block known rogue update domains", "detail": "Use DNS filtering, firewall and threat intel integration. [cite: 828]" },
+          { "action": "Monitor browser download behaviour", "detail": "Flag abnormal executable downloads initiated via browser. [cite: 828]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Suspicious file download detected following web activity. [cite: 830]" },
+          { "action": "Identify file hash and execution path", "detail": "Confirm file was dropped in a non-standard location (e.g., %AppData%). [cite: 830]" },
+          { "action": "Analyse execution behaviour", "detail": "Look for persistence mechanisms (registry run keys, scheduled tasks). [cite: 830]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Isolate the affected host", "detail": "Prevent further C2 communication or lateral movement. [cite: 833]" },
+          { "action": "Kill malicious processes", "detail": "Use EDR to terminate backdoor operations. [cite: 833]" },
+          { "action": "Quarantine the fake update executable", "detail": "Block by hash and signature in endpoint and perimeter tools. [cite: 833]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove persistence mechanisms", "detail": "Delete registry keys, scheduled tasks or startup folder entries. [cite: 835]" },
+          { "action": "Clean the malware", "detail": "Use AV/EDR tools or manually delete known dropped files and services. [cite: 835]" },
+          { "action": "Scan for related indicators", "detail": "Check for downloader scripts, payload droppers or C2 callbacks. [cite: 835]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Reconnect system after validation", "detail": "Once threat is fully removed and endpoint is hardened. [cite: 837]" },
+          { "action": "Monitor for reinfection attempts", "detail": "Watch for beaconing, re-downloads or related phishing attempts. [cite: 837]" },
+          { "action": "Re-train user on safe browsing habits", "detail": "Address the source of the incident with contextual training. [cite: 837]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Review browser and endpoint protection policies", "detail": "Enforce auto-update via admin channels only. [cite: 839]" },
+          { "action": "Update alerting thresholds", "detail": "For browser downloads of .exe, .js or other script-based files. [cite: 840]" },
+          { "action": "Conduct phishing simulations", "detail": "Involving fake update prompts to measure user resilience. [cite: 840]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-29",
+    "title": "Token Theft via Cross-Site Scripting (XSS)",
+    "category": "AppSec",
+    "severity": "High",
+    "scenario": "An attacker discovers a stored or reflected XSS vulnerability in a corporate web application. By injecting malicious JavaScript, they steal session cookies, JWTs or OAuth tokens from logged-in users. [cite: 852, 853] This enables the attacker to impersonate victims without needing credentials or bypassing MFA. [cite: 854]",
+    "detection": "WAF, SIEM, Web Server Logs, Browser Telemetry, EDR, Bug Bounty Reports. [cite: 856]",
+    "mitre": "T1059.007 (JavaScript Execution), T1557 (Man-in-the-Middle for token theft), T1185 (Browser Session Hijacking). [cite: 862]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Implement Content Security Policy (CSP)", "detail": "To block inline scripts and limit JS sources. [cite: 859]" },
+          { "action": "Set HttpOnly and Secure flags", "detail": "On cookies to prevent client-side access and enforce HTTPS. [cite: 859]" },
+          { "action": "Conduct regular code reviews and dynamic testing", "detail": "For web app vulnerabilities (e.g., using OWASP ZAP, Burp Suite). [cite: 859]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "WAF or SIEM logs XSS payload or suspicious JS execution. [cite: 861]" },
+          { "action": "Identify exploited endpoint", "detail": "Locate the exact parameter or page vulnerable to injection. [cite: 861]" },
+          { "action": "Correlate user sessions", "detail": "Determine who visited the page and had tokens stolen. [cite: 861]" },
+          { "action": "Inspect malicious JS", "detail": "Was it stealing tokens, sending them to external servers or modifying DOM?. [cite: 862]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Take down the vulnerable endpoint or page", "detail": "Prevent further exposure. [cite: 864]" },
+          { "action": "Revoke exposed tokens or sessions", "detail": "Via identity provider or application back-end. [cite: 864]" },
+          { "action": "Block outbound traffic to attacker-controlled domains", "detail": "Used to receive stolen data. [cite: 864]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Patch the XSS vulnerability", "detail": "Escape user input, validate parameters, use proper output encoding. [cite: 866]" },
+          { "action": "Clean up application code", "detail": "Review all injection points for similar flaws. [cite: 866]" },
+          { "action": "Rotate signing keys for tokens", "detail": "If JWT secrets or refresh tokens may have been compromised. [cite: 866]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Resume application services", "detail": "After patch is tested and verified in staging/production. [cite: 868]" },
+          { "action": "Monitor user re-authentication", "detail": "Ensure only legitimate logins are observed post-patch. [cite: 868]" },
+          { "action": "Conduct post-incident scans", "detail": "Look for new signs of token misuse or reinjection of payloads. [cite: 868]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct full RCA", "detail": "How was the XSS introduced and how long was it exploitable?. [cite: 872]" },
+          { "action": "Educate developers", "detail": "On secure coding practices, escaping and content handling. [cite: 872]" },
+          { "action": "Update WAF rules and SIEM use cases", "detail": "To detect token theft patterns and JS exfiltration attempts. [cite: 872]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-30",
+    "title": "Remote Desktop Exposure via Misconfigured Firewall/NAT Rules",
+    "category": "Network Security",
+    "severity": "High",
+    "scenario": "A system is unintentionally exposed to the internet with RDP, VNC or SSH ports open due to misconfigured firewall rules or incorrect NAT settings. [cite: 885] Attackers scan for such ports and launch brute-force or exploitation attempts to gain access and move laterally within the network. [cite: 886]",
+    "detection": "SIEM, Perimeter Firewall Logs, NDR, Cloud Security Scanners, Threat Intel Feeds. [cite: 887]",
+    "mitre": "T1021.001 (Remote Services: RDP), T1110 (Brute Force), T1133 (External Remote Services). [cite: 894]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Implement geo-IP blocking and brute-force protection", "detail": "At firewall and endpoint level. [cite: 891]" },
+          { "action": "Restrict RDP/SSH via VPN or jump server", "detail": "Never expose directly to the internet. [cite: 891]" },
+          { "action": "Use honeypots or deception tech", "detail": "To detect scans and exploit attempts early. [cite: 891]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Inbound connections to RDP/SSH from suspicious IPs or excessive login attempts. [cite: 893]" },
+          { "action": "Identify exposed asset", "detail": "Cross-reference logs with asset inventory and firewall policies. [cite: 893]" },
+          { "action": "Review session logs", "detail": "Look for successful authentications, lateral movement or malware deployment. [cite: 893]" },
+          { "action": "Perform port scans and config reviews", "detail": "Confirm exposure state and misconfiguration source. [cite: 894]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Immediately block inbound remote access", "detail": "Via firewall rules or cloud security groups. [cite: 896]" },
+          { "action": "Isolate the affected host", "detail": "If access was successful or malware is detected. [cite: 896]" },
+          { "action": "Rotate credentials", "detail": "For any accounts that were used during the session. [cite: 896]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Patch the exposed system", "detail": "Especially for known RDP/SSH exploits (e.g., BlueKeep, Zerologon). [cite: 898]" },
+          { "action": "Reconfigure NAT/firewall", "detail": "Ensure only approved remote access paths are allowed. [cite: 898]" },
+          { "action": "Scan for persistence mechanisms", "detail": "Registry keys, startup entries or remote shells. [cite: 898]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Reinstate remote access securely", "detail": "Only via VPN or jump host, with strict rules and MFA. [cite: 900]" },
+          { "action": "Monitor for post-incident activity", "detail": "Watch for beaconing, repeat scans or malware callbacks. [cite: 900]" },
+          { "action": "Resume operations", "detail": "After full patching and hardening are complete. [cite: 900]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "How did the exposure occur? Who applied the firewall rule or NAT config?. [cite: 904]" },
+          { "action": "Improve firewall change management", "detail": "Enforce approvals and routine audits for port exposures. [cite: 904]" },
+          { "action": "Implement external attack surface monitoring", "detail": "Continuous scanning for open ports or risky services. [cite: 904]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-31",
+    "title": "Business Email Compromise via OAuth Token Abuse",
+    "category": "Identity Security",
+    "severity": "High",
+    "scenario": "An attacker gains access to a user's email account not by stealing credentials, but by tricking the user into authorising a malicious third-party OAuth app. The app is granted broad permissions, allowing the attacker to operate stealthily, bypassing MFA and persisting via refresh tokens. [cite: 913]",
+    "detection": "Identity Logs, SIEM, CASB, SSPM, Microsoft 365 / Google Workspace Audit Logs. [cite: 915]",
+    "mitre": "T1550.001 (Application Access Token), T1071.003 (Email for C2), T1110.003 (OAuth Abuse). [cite: 921]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Use SSPM or CASB to monitor third-party app usage", "detail": "Detect new OAuth app grants and risky permissions. [cite: 918]" },
+          { "action": "Enforce app consent policies", "detail": "Block user consent for unverified apps or require admin approval. [cite: 918]" },
+          { "action": "Configure alerts on risky scopes", "detail": "Such as Mail.ReadWrite, Send.Mail, Drive.Read.All. [cite: 918]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Unfamiliar app granted high-scope access to a user's email. [cite: 920]" },
+          { "action": "Identify app ID and scopes", "detail": "Determine what the app can do (read, send, access files). [cite: 920]" },
+          { "action": "Review activity logs", "detail": "Look for unusual mail sends, mail forwarding or inbox rules. [cite: 920]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Revoke app access immediately", "detail": "Via Microsoft 365 / Google Admin console or via Graph API. [cite: 923]" },
+          { "action": "Invalidate access and refresh tokens", "detail": "To block any token reuse from the attacker. [cite: 923]" },
+          { "action": "Suspend account temporarily if misuse is confirmed", "detail": "And enforce re-authentication after cleanup. [cite: 923]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove rogue inbox rules or mail forwards", "detail": "That may redirect sensitive data externally. [cite: 925]" },
+          { "action": "Conduct full mailbox and file review", "detail": "Check for data exfiltration or mail rule creation. [cite: 925]" },
+          { "action": "Rotate credentials and enable re-authentication", "detail": "Remove lingering sessions across all devices. [cite: 925]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore user access securely", "detail": "With conditional access and MFA enforcement. [cite: 927]" },
+          { "action": "Monitor post-incident activity", "detail": "For repeat app grant attempts or login anomalies. [cite: 927]" },
+          { "action": "Strengthen OAuth governance", "detail": "Update app blocklists and review app consent settings. [cite: 927]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Identify how the app was authorised and why wasn't it blocked?. [cite: 929]" },
+          { "action": "Improve app visibility tools", "detail": "Implement dashboards to monitor OAuth apps across the organisation. [cite: 929]" },
+          { "action": "Update training materials", "detail": "Focus on consent phishing awareness. [cite: 930]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-32",
+    "title": "Data Exfiltration via DNS Tunnelling",
+    "category": "Network Security",
+    "severity": "Critical",
+    "scenario": "An attacker who has gained access to an internal host uses DNS tunnelling tools (e.g., iodine, dnscat2) to encode data in DNS queries and exfiltrate it to attacker-controlled domains. These DNS requests often look like long, random subdomains of a suspicious domain and bypass perimeter firewalls. [cite: 944]",
+    "detection": "DNS Logs, NDR, SIEM, EDR, Firewall Logs, Threat Intel Feeds. [cite: 946]",
+    "mitre": "T1071.004 (Application Layer Protocol: DNS), T1048 (Exfiltration Over Alternative Protocol). [cite: 952]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enable DNS logging and retention", "detail": "Capture query names, source IPs and resolver data. [cite: 949]" },
+          { "action": "Implement DNS monitoring tools", "detail": "Use NDR or DNS analytics to detect anomalies. [cite: 949]" },
+          { "action": "Alert on high-frequency and entropy-based queries", "detail": "e.g., 50+ DNS requests per minute from a single host. [cite: 949]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Unusual DNS behaviour detected, e.g., long subdomains, spikes in DNS volume. [cite: 951]" },
+          { "action": "Identify source host and user", "detail": "Correlate logs to determine which system is exfiltrating data. [cite: 951]" },
+          { "action": "Extract and decode suspicious queries", "detail": "Attempt to reconstruct exfiltrated data or file names. [cite: 951]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Isolate affected endpoint", "detail": "Immediately block network access to prevent further leakage. [cite: 954]" },
+          { "action": "Block suspicious domains and resolvers", "detail": "At internal DNS servers, firewalls and proxies. [cite: 954]" },
+          { "action": "Revoke credentials used on the host", "detail": "If attacker had access to mapped shares or cloud tokens. [cite: 954]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove tunnelling tools or scripts", "detail": "From the compromised system (e.g., iodine, dnscat2). [cite: 956]" },
+          { "action": "Check for persistence mechanisms", "detail": "Registry keys, startup folders, scheduled tasks. [cite: 956]" },
+          { "action": "Review for lateral movement", "detail": "Was the tool used on multiple hosts or installed via script?. [cite: 956]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Patch and harden the host", "detail": "Apply updates and enforce endpoint protection policies. [cite: 958]" },
+          { "action": "Restore normal DNS configurations", "detail": "With internal monitoring still enabled. [cite: 958]" },
+          { "action": "Monitor for reattempts", "detail": "On both endpoint and network levels. [cite: 958]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Determine how the DNS tunnelling tool was deployed and which controls failed. [cite: 960]" },
+          { "action": "Refine DNS policies and alerts", "detail": "Add signatures or detection rules for tunnelling behaviours. [cite: 961]" },
+          { "action": "Train SOC analysts", "detail": "On DNS tunnelling detection and response. [cite: 961]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-33",
+    "title": "Compromise Through Vulnerable Open-Source Components",
+    "category": "AppSec",
+    "severity": "Critical",
+    "scenario": "A public-facing or internal web application uses an outdated open-source library or component (e.g., Log4j, Apache Struts) with known vulnerabilities. Attackers exploit the flaw to execute arbitrary code, extract sensitive data or gain access to backend systems. [cite: 974]",
+    "detection": "WAF, SIEM, SAST/DAST Scanners, Runtime Protection Tools (RASP), Threat Intel Feeds. [cite: 976]",
+    "mitre": "T1190 (Exploit Public-Facing Application), T1210 (Exploitation of Remote Services), T1059 (Command Execution). [cite: 982]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Maintain SBOM (Software Bill of Materials)", "detail": "For all deployed apps and dependencies. [cite: 979]" },
+          { "action": "Integrate SCA (Software Composition Analysis)", "detail": "Tools like Snyk, Dependabot or WhiteSource. [cite: 979]" },
+          { "action": "Deploy WAF with virtual patching", "detail": "To block known exploit signatures in HTTP traffic. [cite: 979]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "WAF or SIEM detects suspicious request targeting known vulnerable endpoint. [cite: 981]" },
+          { "action": "Identify vulnerable component", "detail": "e.g., log4j-core-2.14.1.jar or struts2-core-2.3.x. [cite: 981]" },
+          { "action": "Analyse exploitation attempt", "detail": "Review payload (e.g., ${jndi:ldap://...} or OGNL injection). [cite: 981]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Block malicious traffic", "detail": "At WAF, firewall or reverse proxy layer. [cite: 984]" },
+          { "action": "Isolate affected application", "detail": "Temporarily take offline if compromise is confirmed. [cite: 984]" },
+          { "action": "Rotate credentials or secrets", "detail": "If stored in the app or environment variables. [cite: 984]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Patch or remove vulnerable component", "detail": "Upgrade to safe version or disable feature temporarily. [cite: 986]" },
+          { "action": "Check for webshells or dropped binaries", "detail": "Look in app server directories and upload paths. [cite: 986]" },
+          { "action": "Audit application logs and access patterns", "detail": "Detect suspicious user sessions or command execution. [cite: 986]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore application in patched state", "detail": "After patch is tested and verified in staging/production. [cite: 988]" },
+          { "action": "Monitor for continued exploit attempts", "detail": "Maintain elevated alerting during initial days post-patch. [cite: 988]" },
+          { "action": "Conduct vulnerability scanning", "detail": "To ensure no other legacy components are exploitable. [cite: 988]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Identify how the vulnerable component persisted in production. [cite: 992]" },
+          { "action": "Update CI/CD pipelines", "detail": "Integrate dependency scanning and fail builds on critical CVEs. [cite: 992]" },
+          { "action": "Educate developers", "detail": "On secure dependency management and avoiding deprecated libraries. [cite: 992]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-34",
+    "title": "Command and Control via Cloud Storage Platforms",
+    "category": "Network Security",
+    "severity": "High",
+    "scenario": "An attacker abuses a cloud storage platform (such as Dropbox or Google Drive) to host malware payloads, receive stolen data or exchange instructions with compromised systems. Since traffic to these services is often allowed by default, the attacker evades traditional C2 detection. [cite: 1003]",
+    "detection": "Proxy Logs, CASB, SIEM, EDR, NDR, Threat Intel Feeds. [cite: 1004]",
+    "mitre": "T1105 (Ingress Tool Transfer), T1567.002 (Exfiltration to Cloud Storage), T1095 (Non-Application Layer Protocol). [cite: 1006]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Monitor file uploads/downloads to cloud storage", "detail": "Use CASB or proxy integrations with DLP and anomaly detection. [cite: 1004]" },
+          { "action": "Deploy threat intel enrichment", "detail": "Detect access to known malicious shared folders or URLs. [cite: 1004]" },
+          { "action": "Define policies for allowed storage services", "detail": "Limit access only to business-approved cloud platforms. [cite: 1004]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Unusual cloud traffic (e.g., executable download from public Dropbox link) or unapproved tool access. [cite: 1005]" },
+          { "action": "Identify host and user involved", "detail": "Correlate download/upload timestamp and destination folder. [cite: 1005]" },
+          { "action": "Detect beaconing behaviour", "detail": "Repeated access to the same cloud folder or scheduled uploads. [cite: 1006]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Isolate endpoint showing C2 patterns", "detail": "Prevent further uploads/downloads or lateral spread. [cite: 1006]" },
+          { "action": "Revoke OAuth/cloud API tokens", "detail": "If linked to attacker-controlled apps or sessions. [cite: 1006]" },
+          { "action": "Block access to malicious domains or file-sharing links", "detail": "Using proxy/DNS filters and threat intel lists. [cite: 1006]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove malicious files or tools", "detail": "From the host and shared cloud locations. [cite: 1007]" },
+          { "action": "Revoke access permissions to cloud shares", "detail": "Remove public links or externally shared files. [cite: 1007]" },
+          { "action": "Clean up persistence mechanisms", "detail": "e.g., scripts or scheduled tasks accessing cloud services periodically. [cite: 1007]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Reconnect systems after clean-up", "detail": "With monitoring in place for cloud traffic anomalies. [cite: 1007]" },
+          { "action": "Re-enable cloud access where appropriate", "detail": "Only for vetted users and services. [cite: 1007]" },
+          { "action": "Monitor for reinfection attempts", "detail": "Or repeated connections to suspicious folders/domains. [cite: 1007]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Determine how attacker accessed or delivered C2 instructions via cloud. [cite: 1008]" },
+          { "action": "Update CASB and proxy alert rules", "detail": "Add specific detections for unauthorised cloud usage and file types. [cite: 1009]" },
+          { "action": "Refine cloud access policies", "detail": "Limit OAuth authorisations and public folder sharing settings. [cite: 1009]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-35",
+    "title": "Persistence Through Malicious Browser Extensions",
+    "category": "Endpoint Security",
+    "severity": "High",
+    "scenario": "An attacker convinces a user to install a browser extension that appears legitimate, but the extension has hidden functionality. It may capture keystrokes, steal session tokens, manipulate browser traffic or serve as a persistent C2 channel. [cite: 1012]",
+    "detection": "EDR, Browser Logs, SIEM, CASB, User Reports, Endpoint Management Tools. [cite: 1013]",
+    "mitre": "T1176 (Browser Extensions), T1056.001 (Input Capture: Keylogging), T1557 (Man-in-the-Middle). [cite: 1015]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enforce browser extension policies", "detail": "Restrict installations via GPO or MDM (e.g., only allowlisted extensions). [cite: 1014]" },
+          { "action": "Monitor extension inventory", "detail": "Through endpoint/browser telemetry. [cite: 1014]" },
+          { "action": "Block access to unverified extension stores", "detail": "Using proxy or firewall policies. [cite: 1014]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Unknown or flagged browser extension installed by a user. [cite: 1014]" },
+          { "action": "Identify extension ID, name and permissions", "detail": "Check for access to tabs, cookies, clipboard, etc. [cite: 1014]" },
+          { "action": "Correlate user activity and logs", "detail": "Was the extension capturing credentials, sessions or injecting content? [cite: 1014]" },
+          { "action": "Reverse engineer extension if needed", "detail": "Analyse code or behaviour using a sandbox or manual inspection. [cite: 1015]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Remotely uninstall the extension", "detail": "Via MDM or browser enterprise controls. [cite: 1015]" },
+          { "action": "Isolate affected device", "detail": "If compromise is confirmed (e.g., credential theft or token hijacking occurred). [cite: 1015]" },
+          { "action": "Block extension ID via policy or DNS filters", "detail": "Prevent reinstallation or callback communication. [cite: 1015]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Clear browser cache, sessions and stored tokens", "detail": "Remove persistent cookies or hijacked tokens. [cite: 1016]" },
+          { "action": "Remove associated files or processes", "detail": "If the extension dropped additional scripts or payloads. [cite: 1016]" },
+          { "action": "Scan for additional endpoints with same extension", "detail": "Using EDR or browser telemetry. [cite: 1016]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore browser access with clean profile", "detail": "And re-authentication using new credentials. [cite: 1017]" },
+          { "action": "Monitor for new extension installs", "detail": "Flag users bypassing browser security policies. [cite: 1017]" },
+          { "action": "Re-enable access to business apps", "detail": "After validation of identity and device integrity. [cite: 1017]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "How was the extension installed and why wasn’t it blocked?. [cite: 1017]" },
+          { "action": "Strengthen extension governance", "detail": "Define and enforce allowlist/blocklist policies. [cite: 1018]" },
+          { "action": "Educate users and support teams", "detail": "On identifying and reporting suspicious browser behaviours. [cite: 1018]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-36",
+    "title": "Ransomware via Third-Party Vendor Compromise",
+    "category": "Supply Chain",
+    "severity": "Critical",
+    "scenario": "A trusted third-party vendor (e.g., IT support, software provider, MSP) is compromised. The attacker uses this trust relationship, such as VPN access, RMM tools or supply chain software updates, to deploy ransomware across the environment, encrypting files and demanding payment. [cite: 1022]",
+    "detection": "EDR, SIEM, File Integrity Monitoring, Backup Alerts, Threat Intelligence Feeds. [cite: 1023]",
+    "mitre": "T1078 (Valid Accounts), T1486 (Data Encrypted for Impact), T1210 (Remote Services Exploitation), T1195 (Supply Chain Compromise). [cite: 1025]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enforce vendor access segmentation", "detail": "Use separate, time-limited VPN accounts with MFA. [cite: 1023]" },
+          { "action": "Monitor vendor RMM activity", "detail": "Record sessions and alert on unusual behaviours. [cite: 1023]" },
+          { "action": "Isolate backup systems", "detail": "Ensure backups are offline or immutable. [cite: 1023]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "File encryption activity, file renaming patterns or EDR ransomware behaviour detected. [cite: 1024]" },
+          { "action": "Identify source of attack", "detail": "Trace initial access point to vendor VPN, RMM tool or software update. [cite: 1024]" },
+          { "action": "Inspect ransom notes and filenames", "detail": "To identify ransomware variant (e.g., LockBit, Black Basta). [cite: 1024]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Disconnect affected systems from the network", "detail": "Prevent further spread of ransomware. [cite: 1026]" },
+          { "action": "Disable vendor accounts and remote access", "detail": "Immediately terminate sessions and revoke credentials. [cite: 1026]" },
+          { "action": "Isolate backup infrastructure", "detail": "Verify if backups are impacted or encrypted. [cite: 1026]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove ransomware executables and persistence mechanisms", "detail": "From all impacted endpoints and servers. [cite: 1026]" },
+          { "action": "Clean or reimage compromised systems", "detail": "Depending on the extent of damage. [cite: 1026]" },
+          { "action": "Remove malicious vendor scripts or software", "detail": "That may have been used as a payload. [cite: 1026]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore from known-good backups", "detail": "After verifying no reinfection or backdoors exist. [cite: 1029]" },
+          { "action": "Resume critical services in phases", "detail": "Based on validated restoration process. [cite: 1029]" },
+          { "action": "Monitor systems post restoration", "detail": "For any residual ransomware or indicators of compromise. [cite: 1029]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Determine how the vendor’s access was used and what could have been prevented. [cite: 1028]" },
+          { "action": "Review vendor management practices", "detail": "Strengthen controls around onboarding, access and monitoring. [cite: 1028]" },
+          { "action": "Update incident response and restoration plans", "detail": "Based on observed weaknesses. [cite: 1028]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-37",
+    "title": "Secrets Leakage Through Public Git Repositories",
+    "category": "Credential Exposure – Public Repository",
+    "severity": "High",
+    "scenario": "A developer accidentally commits secrets (e.g., AWS keys, database passwords, private keys) to a public Git repository. Attackers scan these platforms for such leaks and may quickly use the credentials for unauthorised access, data exfiltration or lateral movement. [cite: 1031]",
+    "detection": "Git Scanners, SIEM, Bug Bounty Reports, Threat Intel Feeds, Developer Alerts. [cite: 1032]",
+    "mitre": "T1552.001 (Credentials in Files), T1210 (Exploitation of Remote Services), T1078 (Valid Accounts). [cite: 1034]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Use Git secret scanners pre-commit", "detail": "e.g., Git hooks with gitleaks, truffleHog, detect-secrets. [cite: 1033]" },
+          { "action": "Implement CI/CD pipeline scanning", "detail": "Automatically check commits for hardcoded secrets. [cite: 1033]" },
+          { "action": "Monitor public Git platforms", "detail": "Use tools or services like GitHub Advanced Security, GitGuardian or custom scripts. [cite: 1033]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Public repo scan detects exposed secret (e.g., AWS key pattern match). [cite: 1034]" },
+          { "action": "Identify affected repository and commit", "detail": "Check whether it’s public and accessible to unauthorised users. [cite: 1034]" },
+          { "action": "Validate exposure and usage", "detail": "Confirm whether the secret is real, active and in use. Look for recent access using the leaked credentials. [cite: 1034]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Revoke the exposed secret immediately", "detail": "e.g., deactivate API key, rotate access key, revoke token. [cite: 1035]" },
+          { "action": "Remove the secret from history", "detail": "Use tools like git filter-branch or BFG Repo Cleaner. [cite: 1035]" },
+          { "action": "Temporarily disable associated service", "detail": "If the secret has been used maliciously. [cite: 1035]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Replace affected secrets securely", "detail": "Use environment variables or secure vaults for redeployment. [cite: 1035]" },
+          { "action": "Delete or archive exposed repositories", "detail": "If no longer needed or too compromised. [cite: 1035]" },
+          { "action": "Scan entire repository history", "detail": "To detect any additional secrets in older commits. [cite: 1035]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Resume services with new credentials", "detail": "Validate correct configuration in all environments. [cite: 1036]" },
+          { "action": "Monitor access patterns", "detail": "Watch for any use of revoked credentials (attempted re-use). [cite: 1036]" },
+          { "action": "Conduct credential hygiene check", "detail": "Across all environments associated with affected dev team. [cite: 1036]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Why was the secret committed? Were policies bypassed?. [cite: 1037]" },
+          { "action": "Educate developers and DevOps", "detail": "Share what went wrong and how to avoid in future. [cite: 1038]" },
+          { "action": "Enforce tighter secret scanning", "detail": "In local and CI environments. [cite: 1038]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-38",
+    "title": "Privilege Escalation via Unpatched Endpoint Software",
+    "category": "Privilege Escalation – LPE Exploitation",
+    "severity": "High",
+    "scenario": "An attacker gains initial access to a low-privileged user account on a system. They then exploit an unpatched vulnerability in the local OS or software (e.g., Windows Print Spooler) to escalate to SYSTEM/root privileges and move laterally across the environment. [cite: 1041]",
+    "detection": "EDR, SIEM, Vulnerability Scanners, Endpoint Logs, Threat Intelligence Feeds. [cite: 1042]",
+    "mitre": "T1068 (Exploitation for Privilege Escalation), T1134 (Access Token Manipulation), T1543.003 (Windows Service Creation). [cite: 1044]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Regular vulnerability scanning", "detail": "Detect LPE vulnerabilities. [cite: 1043]" },
+          { "action": "Patch management enforcement", "detail": "Automate OS and software updates across endpoints. [cite: 1043]" },
+          { "action": "Deploy EDR with LPE exploit detection", "detail": "Alert on exploit behaviour and suspicious process chains. [cite: 1043]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "EDR detects suspicious child process spawned by low-privilege user or exploit signature. [cite: 1043]" },
+          { "action": "Identify exploited process or DLL", "detail": "e.g., unusual use of rpcss.dll, splwow64.exe or service binary abuse. [cite: 1043]" },
+          { "action": "Confirm escalation", "detail": "Look for UID/SID changes, NT AUTHORITY\\SYSTEM context or token manipulation. [cite: 1043]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Isolate affected endpoint", "detail": "Block lateral movement and external communication. [cite: 1044]" },
+          { "action": "Suspend suspicious process chains", "detail": "Using EDR or remote kill commands. [cite: 1044]" },
+          { "action": "Block known exploit indicators", "detail": "Hashes, file paths or behavioural signatures. [cite: 1044]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Patch the exploited software or OS", "detail": "Apply security updates to fix the LPE flaw. [cite: 1045]" },
+          { "action": "Remove any payloads or persistence mechanisms", "detail": "Registry keys, scheduled tasks, services or malware. [cite: 1045]" },
+          { "action": "Re-image endpoint if compromise is extensive", "detail": "Especially in high-assurance environments. [cite: 1045]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore system operations", "detail": "After patching, validation and threat removal. [cite: 1047]" },
+          { "action": "Monitor endpoint for signs of reinfection or escalation", "detail": "For at least 72 hours post-recovery. [cite: 1047]" },
+          { "action": "Audit access and permissions", "detail": "Re-verify local and domain group memberships. [cite: 1047]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Identify how long the system was unpatched and why. [cite: 1046]" },
+          { "action": "Review and strengthen patching strategy", "detail": "Include better reporting and enforcement loops. [cite: 1047]" },
+          { "action": "Update detection use cases", "detail": "Add exploit technique patterns and post exploitation alerts. [cite: 1047]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-39",
+    "title": "Lateral Movement via Service Account Abuse",
+    "category": "Lateral Movement – Privileged Account Abuse",
+    "severity": "Critical",
+    "scenario": "An attacker who has gained access to one endpoint discovers or captures credentials for a high-privileged service account. The attacker uses the service account, which often has excessive or unrestricted access, to move laterally across systems or access sensitive resources. [cite: 1050]",
+    "detection": "SIEM, EDR, AD Logs, Identity Protection Tools, Honeytokens. [cite: 1051]",
+    "mitre": "T1021.002 (SMB/Windows Admin Shares), T1550 (Use of Stolen Credentials), T1078 (Valid Accounts). [cite: 1053]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Monitor service account behaviour", "detail": "Use UEBA, baselining and identity analytics. [cite: 1051]" },
+          { "action": "Enforce least privilege on service accounts", "detail": "No interactive login, limit domain access. [cite: 1051]" },
+          { "action": "Use managed identities or secrets vaults", "detail": "Avoid embedding credentials in plaintext. [cite: 1051]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Unusual use of service account, such as interactive login or access to unrelated systems. [cite: 1052]" },
+          { "action": "Identify the origin system and target", "detail": "Trace lateral movement path from initial host. [cite: 1052]" },
+          { "action": "Review process and command logs", "detail": "Look for PsExec, wmic, RDP sessions or scheduled task abuse. [cite: 1052]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Disable or rotate credentials of affected service account", "detail": "If compromise is confirmed or strongly suspected. [cite: 1053]" },
+          { "action": "Isolate involved hosts", "detail": "Limit further propagation or credential harvesting. [cite: 1053]" },
+          { "action": "Block known malicious IPs or user agents", "detail": "From firewall, proxy or identity provider. [cite: 1053]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Scan and clean compromised systems", "detail": "Remove tools, backdoors, persistence mechanisms. [cite: 1054]" },
+          { "action": "Review and tighten service account privileges", "detail": "Remove interactive logon, remote desktop, etc. [cite: 1054]" },
+          { "action": "Check for reused credentials", "detail": "On other hosts or services that may be affected. [cite: 1054]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Re-enable service accounts with new credentials", "detail": "Only after patching and role validation. [cite: 1055]" },
+          { "action": "Monitor post-recovery usage", "detail": "Especially for the next 7–14 days with tighter alerts. [cite: 1055]" },
+          { "action": "Perform password/credential resets", "detail": "For all accounts linked to the same tier of privilege. [cite: 1055]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Determine how the account was exposed and used. [cite: 1055]" },
+          { "action": "Refactor service account strategy", "detail": "Segment, restrict and monitor them rigorously. [cite: 1056]" },
+          { "action": "Update detection content", "detail": "Create custom rules for service account anomaly detection. [cite: 1056]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-40",
+    "title": "Initial Access via Phishing with Malicious Macros",
+    "category": "Initial Access – Phishing with Weaponised Attachment",
+    "severity": "High",
+    "scenario": "An employee receives a phishing email with an attachment (e.g., .docm, .xlsm) that contains malicious VBA macros. When enabled, the macro executes scripts (e.g., PowerShell, MSHTA) to download and run malware, establishing initial access or dropping payloads. [cite: 1059]",
+    "detection": "Email Gateway, EDR, SIEM, Endpoint Alerts, Threat Intel Feeds. [cite: 1060]",
+    "mitre": "T1566.001 (Phishing: Spearphishing Attachment), T1059.001 (PowerShell), T1203 (Exploitation for Client Execution). [cite: 1062]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enforce macro restriction policies", "detail": "Block macros in Office files from the internet (e.g., via GPO or Intune). [cite: 1060]" },
+          { "action": "Deploy email security filtering", "detail": "Detect and quarantine suspicious attachments. [cite: 1060]" },
+          { "action": "Use sandboxing for inbound attachments", "detail": "Detonate files and analyse behaviour. [cite: 1061]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Email gateway flags a suspicious attachment or EDR detects macro-triggered process. [cite: 1062]" },
+          { "action": "Identify affected user and machine", "detail": "Locate email recipient and where the macro was executed. [cite: 1062]" },
+          { "action": "Correlate spawned processes", "detail": "winword.exe → powershell.exe, mshta.exe or network activity. [cite: 1062]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Isolate the affected endpoint", "detail": "Prevent malware from spreading or communicating externally. [cite: 1063]" },
+          { "action": "Revoke user session tokens", "detail": "If credential theft or token access is suspected. [cite: 1063]" },
+          { "action": "Quarantine the email", "detail": "Remove from other inboxes if multiple users received it. [cite: 1063]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove downloaded payloads", "detail": "From disk, registry and memory using EDR tools. [cite: 1063]" },
+          { "action": "Delete malicious email and related artefacts", "detail": "Including attachments, dropped files and persistence mechanisms. [cite: 1063]" },
+          { "action": "Check for persistence", "detail": "Registry autoruns, scheduled tasks, startup folder entries. [cite: 1063]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Patch system and update definitions", "detail": "Ensure antivirus and software are fully updated. [cite: 1064]" },
+          { "action": "Reconnect system to the network", "detail": "Only after full clean-up validation. [cite: 1064]" },
+          { "action": "Resume user activities with caution", "detail": "After educating the user and confirming system health. [cite: 1064]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "How did the file bypass detection and what user actions enabled execution?. [cite: 1065]" },
+          { "action": "Update email rules and detection logic", "detail": "Refine attachment scans and macro signatures. [cite: 1066]" },
+          { "action": "Perform campaign scoping", "detail": "Check if multiple employees received variations of the same phishing campaign. [cite: 1066]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-41",
+    "title": "Cloud Credential Theft from Exposed Configuration Files",
+    "category": "Cloud Security",
+    "severity": "Critical",
+    "scenario": "Cloud credentials (e.g., access keys, client secrets, tokens) are embedded in config files that are accidentally left on exposed file shares, public Git repositories, misconfigured web servers or developer endpoints. Adversaries scan for such exposures, extract credentials and use them to access cloud resources. [cite: 1068, 1069]",
+    "detection": "CASB, SIEM, EDR, DLP, Git Scanners, Threat Intelligence Feeds. [cite: 1070]",
+    "mitre": "T1552.001 (Credentials in Files), T1078.004 (Cloud Accounts), T1526 (Cloud Service Discovery). [cite: 1072]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enforce credential storage standards", "detail": "Use vaults (e.g., AWS Secrets Manager, Azure Key Vault) instead of hardcoding. [cite: 1071]" },
+          { "action": "Scan code and config files for secrets", "detail": "Use Pre-commit hooks, CI/CD scanners (e.g., gitleaks, truffleHog). [cite: 1071]" },
+          { "action": "Monitor public and internal repositories", "detail": "Detect accidentally committed cloud credentials. [cite: 1071]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Credential pattern (e.g., AWS key format) found in a file or unusual cloud API usage detected. [cite: 1071]" },
+          { "action": "Validate exposure and usage", "detail": "Confirm if credential is active and whether it has been used. [cite: 1071]" },
+          { "action": "Analyse access patterns", "detail": "Look for access from suspicious IPs, geographies or services. [cite: 1071]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Revoke exposed keys/tokens immediately", "detail": "Rotate all exposed credentials and disable the leaked ones. [cite: 1073]" },
+          { "action": "Isolate affected services or accounts", "detail": "Disable compromised sessions or roles. [cite: 1073]" },
+          { "action": "Block malicious IPs", "detail": "Using cloud firewall rules and web ACLs. [cite: 1073]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove credentials from all known locations", "detail": "Repositories, file shares, config folders. [cite: 1073]" },
+          { "action": "Redeploy apps using secure secrets management", "detail": "Refactor code to pull secrets securely at runtime. [cite: 1073]" },
+          { "action": "Audit environment for similar exposures", "detail": "Ensure this is not a recurring misconfiguration. [cite: 1073]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Resume cloud operations", "detail": "With all credentials rotated and access logs reviewed. [cite: 1074]" },
+          { "action": "Apply IAM policy hardening", "detail": "Enforce least privilege and session limits. [cite: 1074]" },
+          { "action": "Monitor cloud account for follow-up activity", "detail": "Elevated logging for a period post-recovery. [cite: 1074]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Understand how/where the config file was exposed. [cite: 1074]" },
+          { "action": "Educate teams involved", "detail": "Secure coding, deployment and cloud key handling best practices. [cite: 1074]" },
+          { "action": "Update incident response plans", "detail": "Include usage logs, attacker IPs and exploited services. [cite: 1075]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-42",
+    "title": "Data Exfiltration via Misconfigured S3 Buckets",
+    "category": "Cloud Security",
+    "severity": "Critical",
+    "scenario": "A storage bucket (e.g., Amazon S3) is accidentally made public or has overly permissive access (e.g., Everyone:Read). Attackers identify and access the bucket using tools like Shodan, downloading sensitive data or uploading malicious files. [cite: 1077, 1078]",
+    "detection": "CSPM Tools, CloudTrail Logs, SIEM, Threat Intelligence, Public Scanners. [cite: 1079]",
+    "mitre": "T1537 (Transfer Data to Cloud Account), T1567.002 (Exfiltration to Cloud Storage), T1195 (Supply Chain Compromise). [cite: 1081]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enforce least privilege bucket policies", "detail": "Limit access to specific IAM users/roles. [cite: 1079]" },
+          { "action": "Implement bucket policy validation tools", "detail": "e.g., AWS Config Rules, AWS Trusted Advisor. [cite: 1079]" },
+          { "action": "Scan for exposed buckets", "detail": "Using CSPM platforms and third-party tools (e.g., ScoutSuite, Prowler). [cite: 1079]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Unusual public access or detection of bucket in public scan. [cite: 1080]" },
+          { "action": "Identify exposed bucket and permissions", "detail": "Confirm public access, write permissions and data at risk. [cite: 1080]" },
+          { "action": "Correlate with access logs", "detail": "Identify who accessed what and from where. [cite: 1080]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Immediately restrict or revoke public access", "detail": "Change bucket ACLs and block public policies. [cite: 1082]" },
+          { "action": "Enable S3 Block Public Access settings", "detail": "Globally or per-bucket as appropriate. [cite: 1082]" },
+          { "action": "Disable all anonymous and write access", "detail": "Until reviewed and approved. [cite: 1082]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Audit contents of the bucket", "detail": "Remove sensitive or unauthorised files. [cite: 1082]" },
+          { "action": "Rotate credentials and secrets found in files", "detail": "If secrets were exposed in configuration or code. [cite: 1082]" },
+          { "action": "Patch automation scripts or IaC templates", "detail": "To avoid repeat misconfigurations. [cite: 1082]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Reconfigure and validate bucket access", "detail": "Confirm only authorised users/roles have access. [cite: 1084]" },
+          { "action": "Restore safe versions if overwritten or deleted", "detail": "Use versioning and backup data. [cite: 1084]" },
+          { "action": "Monitor bucket access logs", "detail": "For any follow-up or brute-force access attempts. [cite: 1084]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Determine how and why the bucket was misconfigured. [cite: 1083]" },
+          { "action": "Improve DevOps and IaC validation", "detail": "Integrate checks into CI/CD pipeline (e.g., Terraform with tfsec). [cite: 1083]" },
+          { "action": "Create alerting for risky permissions", "detail": "e.g., s3:ListBucket, s3:GetObject from unknown IPs. [cite: 1084]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-43",
+    "title": "Unauthorised VPN Access from Reused Credentials",
+    "category": "Network Security",
+    "severity": "High",
+    "scenario": "An attacker gains valid credentials for a corporate VPN (e.g., via data breach, credential stuffing or phishing or reused passwords). They authenticate successfully and pivot into internal systems. Since no malware is involved initially, the activity may look like normal user behaviour unless deeper analysis is performed. [cite: 1086, 1087]",
+    "detection": "VPN Logs, SIEM, Identity Protection, UEBA, EDR, MFA Alerts. [cite: 1088]",
+    "mitre": "T1078 (Valid Accounts), T1133 (External Remote Services), T1071.001 (Application Layer Protocol: Web Protocols). [cite: 1090]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enforce MFA for all remote access", "detail": "Ensure VPN logins require 2FA. [cite: 1089]" },
+          { "action": "Monitor login behaviour", "detail": "UEBA for geo-velocity, login time anomalies, unknown IPs. [cite: 1089]" },
+          { "action": "Integrate VPN logs with SIEM", "detail": "For real-time alerting and correlation. [cite: 1089]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Login from suspicious geography, new device or bypassed MFA. [cite: 1089]" },
+          { "action": "Review VPN logs and SIEM correlation", "detail": "Identify login time, IP, user agent and authentication source. [cite: 1089]" },
+          { "action": "Analyse access patterns post-login", "detail": "Review file access, internal movement, command execution. [cite: 1089]" },
+          { "action": "Validate user action", "detail": "Contact user to verify login and deny if unauthorised. [cite: 1089]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Disable the affected account", "detail": "Block further access immediately. [cite: 1090]" },
+          { "action": "Invalidate VPN session/token", "detail": "Revoke the active session if supported by VPN solution. [cite: 1090]" },
+          { "action": "Force credential reset", "detail": "For the user and any other accounts with reused passwords. [cite: 1090]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Scan user endpoint(s)", "detail": "Check for malware, keyloggers or signs of deeper compromise. [cite: 1091]" },
+          { "action": "Audit recent activity", "detail": "Identify what systems, data or services were accessed. [cite: 1091]" },
+          { "action": "Investigate lateral movement or privilege escalation", "detail": "Through AD logs, EDR and internal network telemetry. [cite: 1091]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Re-enable account with new credentials", "detail": "Only after confirming user identity and device safety. [cite: 1092]" },
+          { "action": "Resume VPN access", "detail": "With enforced MFA and monitored login activity. [cite: 1092]" },
+          { "action": "Monitor for repeated login attempts", "detail": "From similar IPs or attacker infrastructure. [cite: 1092]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Identify how credentials were exposed (reuse, breach, phishing). [cite: 1092]" },
+          { "action": "Improve credential hygiene practices", "detail": "Enforce SSO, password managers and training. [cite: 1093]" },
+          { "action": "Implement anomaly-based alerting", "detail": "To detect future valid credential misuse faster. [cite: 1093]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-44",
+    "title": "Initial Access via Rogue IoT Devices",
+    "category": "IoT Security",
+    "severity": "High",
+    "scenario": "An attacker gains access to the internal network by connecting a rogue IoT device to a corporate LAN port (e.g., via lobby, meeting room or misconfigured VLAN). The device either acts as a passive listener or is used to scan, pivot or launch attacks within the network. [cite: 1095, 1096]",
+    "detection": "NAC, SIEM, Network Logs, Asset Discovery Tools, NDR. [cite: 1097]",
+    "mitre": "T1200 (Hardware Additions), T1046 (Network Service Scanning), T1071 (Application Layer Protocol). [cite: 1099]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Implement Network Access Control (NAC)", "detail": "Only authorised MACs and devices can join. [cite: 1097]" },
+          { "action": "Monitor network for unknown MACs", "detail": "Alert on new, unapproved devices. [cite: 1097]" },
+          { "action": "Segment IoT devices from internal network", "detail": "Use VLANs and firewalls to isolate all IoT components. [cite: 1097]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "New/unknown MAC address detected on internal LAN. [cite: 1098]" },
+          { "action": "Identify device characteristics", "detail": "MAC vendor lookup, OS fingerprinting, port scan profile. [cite: 1098]" },
+          { "action": "Determine location of connection", "detail": "Trace switch port or wireless AP used. [cite: 1098]" },
+          { "action": "Monitor device activity", "detail": "DNS queries, port scans, ARP probes, data exfiltration attempts. [cite: 1098]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Disconnect the rogue device", "detail": "Use NAC, port disablement or EDR isolation. [cite: 1099]" },
+          { "action": "Block MAC address at NAC/firewall level", "detail": "Prevent further access from the same hardware. [cite: 1099]" },
+          { "action": "Quarantine VLAN if automated", "detail": "Redirect device to isolated zone for analysis. [cite: 1099]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Inspect the rogue device (if recovered)", "detail": "Identify owner, usage and software running. [cite: 1100]" },
+          { "action": "Conduct forensics", "detail": "Examine logs for lateral movement or data access attempts. [cite: 1100]" },
+          { "action": "Remove persistence if deployed", "detail": "Look for rogue DHCP servers, ARP spoofing or malicious DNS settings. [cite: 1100]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Re-enable affected ports or services", "detail": "After full investigation and validation. [cite: 1102]" },
+          { "action": "Resume normal traffic flows", "detail": "Post containment and segmentation checks. [cite: 1102]" },
+          { "action": "Monitor closely for follow-up activity", "detail": "Internal scanning, new device joins or beaconing. [cite: 1102]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Identify how and why the rogue device bypassed controls. [cite: 1101]" },
+          { "action": "Update NAC and asset policies", "detail": "Enforce stricter access control and device classification. [cite: 1101]" },
+          { "action": "Train staff and physical security", "detail": "Recognise threats from devices left unattended. [cite: 1101]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-45",
+    "title": "Unauthorised Cloud Admin Role Escalation",
+    "category": "Cloud Security",
+    "severity": "Critical",
+    "scenario": "An attacker starts with valid credentials or low-privileged access and exploits overly permissive IAM roles, chained role assumptions, misconfigured policies or stolen tokens to escalate to a high-privilege role (e.g., AdministratorAccess, Global Admin). This grants full control of cloud infrastructure and services. [cite: 1104, 1105]",
+    "detection": "Cloud Audit Logs (e.g., AWS CloudTrail, Azure AD Logs), SIEM, CSPM, Identity Protection Tools. [cite: 1105]",
+    "mitre": "T1078.004 (Valid Accounts: Cloud Accounts), T1078 (Privilege Escalation), T1087.004 (Account Discovery: Cloud Account). [cite: 1107]",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Implement least privilege IAM policies", "detail": "Avoid wildcard actions and over-broad permissions. [cite: 1106]" },
+          { "action": "Monitor cloud role assumption activity", "detail": "Alert on unusual or chained role usage. [cite: 1106]" },
+          { "action": "Enforce MFA for all admin-level access", "detail": "Include support for conditional access policies. [cite: 1106]" }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Admin role assumed by unexpected user or from new location/IP. [cite: 1106]" },
+          { "action": "Review recent login and role activity", "detail": "Trace API calls, role assumption chains and permission changes. [cite: 1107]" },
+          { "action": "Analyse actions taken by escalated role", "detail": "e.g., snapshot creation, user deletion, security group modification. [cite: 1107]" }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Revoke access tokens and sessions", "detail": "Force re-authentication or session invalidation for the account. [cite: 1108]" },
+          { "action": "Disable or lock impacted accounts", "detail": "Including any compromised or misused service principals. [cite: 1108]" },
+          { "action": "Remove elevated role bindings", "detail": "Roll back IAM policy changes or remove role assumption rights. [cite: 1108]" }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Audit for persistence mechanisms", "detail": "Look for new roles, tokens, apps or permission grants added post-escalation. [cite: 1108]" },
+          { "action": "Remove malicious/unauthorised roles", "detail": "Delete any shadow admin or backdoor accounts created. [cite: 1108]" },
+          { "action": "Rebuild compromised credentials or services", "detail": "Rotate IAM access keys, API tokens and service account credentials. [cite: 1108]" }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Re-enable services with reviewed permissions", "detail": "After validating access paths and hardening roles. [cite: 1109]" },
+          { "action": "Monitor IAM activities post-restoration", "detail": "For unusual actions from restored accounts. [cite: 1109]" },
+          { "action": "Continue alerting on elevated access", "detail": "Set temporary heightened logging for sensitive roles. [cite: 1109]" }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Identify initial access vector, escalation path and prevention gaps. [cite: 1110]" },
+          { "action": "Harden IAM policies and review role hierarchy", "detail": "Implement SCPs, conditional access and explicit deny. [cite: 1110]" },
+          { "action": "Enhance detection rules for cloud privilege anomalies", "detail": "Include role chaining, session duration abuse and unusual user agents. [cite: 1110]" }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-46",
+    "title": "Data Exfiltration via Cloud Sync Abuse",
+    "category": "Data Security",
+    "severity": "High",
+    "scenario": "An insider or compromised user syncs sensitive corporate data to a personal or unauthorised cloud storage account using tools like OneDrive, Dropbox or Google Drive. This may bypass traditional network DLP solutions and often occurs over legitimate SSL traffic.",
+    "detection": "CASB, DLP, EDR, Proxy Logs, SIEM, UEBA.",
+    "mitre": "T1537 (Transfer Data to Cloud Account), T1567 (Exfiltration over Web Services).",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enforce cloud access policies", "detail": "Use CASB to control access to personal cloud storage services." },
+          { "action": "Monitor sync client installations", "detail": "Detect unauthorised sync clients on endpoints." },
+          { "action": "Enable content inspection for cloud uploads", "detail": "Use proxy or firewall DLP capabilities." }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Unusual upload activity to cloud storage detected by CASB, DLP or proxy." },
+          { "action": "Correlate user identity and device", "detail": "Match upload activity with endpoint and user." },
+          { "action": "Analyse uploaded data volume and type", "detail": "Confirm if sensitive documents were exfiltrated." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Block access to personal cloud storage", "detail": "Via CASB, proxy or firewall policies." },
+          { "action": "Suspend user access if malicious intent is suspected", "detail": "Prevent further exfiltration." },
+          { "action": "Isolate affected endpoint", "detail": "If it was used as the sync source." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove unauthorised cloud sync clients", "detail": "Via endpoint management tools." },
+          { "action": "Delete local sync folders and logs", "detail": "After preserving forensic evidence." },
+          { "action": "Investigate whether sensitive data was shared externally", "detail": "Look at sharing settings within the cloud account (if accessible)." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Re-authorise user access (if legitimate)", "detail": "Only after policy confirmation and user clearance." },
+          { "action": "Restore endpoint monitoring", "detail": "Ensure sync clients are blocked and DLP is functional." },
+          { "action": "Reinforce policies for data transfer", "detail": "Update acceptable use and cloud access SOPs." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Determine why upload activity wasn’t blocked or flagged earlier." },
+          { "action": "Improve cloud visibility and enforcement", "detail": "Tighten CASB policies and user activity tracking." },
+          { "action": "Deliver user awareness training", "detail": "On cloud usage and data protection responsibilities." }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-47",
+    "title": "Initial Access via OAuth Token Abuse (Browser Session Hijacking)",
+    "category": "Identity Security",
+    "severity": "High",
+    "scenario": "An attacker gains access to a valid OAuth token (e.g., from Google, Microsoft, Okta) by stealing a browser session cookie via phishing, malware or man-in-the-browser attacks. The attacker then uses the stolen token to authenticate without triggering MFA, appearing as the legitimate user.",
+    "detection": "Identity Provider Logs, SIEM, UEBA, EDR, CASB.",
+    "mitre": "T1550.001 (Use Alternate Authentication Material: Web Session Cookie), T1528 (Steal Application Access Token), T1185 (Browser Session Hijacking).",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enforce short token lifetimes", "detail": "Reduce session persistence duration." },
+          { "action": "Enable conditional access policies", "detail": "Restrict risky login scenarios (e.g., from unmanaged devices)." },
+          { "action": "Monitor login patterns", "detail": "Geo-velocity, impossible travel and browser fingerprinting." }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Login from unfamiliar device/IP with no MFA challenge." },
+          { "action": "Check session attributes", "detail": "Browser fingerprint, IP address, device type, token source." },
+          { "action": "Review recent user activity", "detail": "Look for signs of compromise: inbox rules, data access, privilege changes." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Revoke OAuth sessions and tokens", "detail": "Force logout for the affected user across all services." },
+          { "action": "Force logout and MFA re-authentication", "detail": "Across all user sessions." },
+          { "action": "Suspend user access temporarily", "detail": "Until endpoint and session are validated." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Scan the user’s endpoint", "detail": "Look for stealers, token grabbers, browser malware." },
+          { "action": "Remove malicious extensions", "detail": "If browser-based hijack was used." },
+          { "action": "Review API and application authorisations", "detail": "Remove unauthorised third-party OAuth apps." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Re-enable user account", "detail": "After confirming endpoint and session are clean." },
+          { "action": "Monitor session re-authentication logs", "detail": "Watch for reuse of previously stolen cookies." },
+          { "action": "Reinforce browser session protections", "detail": "Enforce re-authentication after IP/device changes." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Determine how the token was stolen (e.g., phishing page, malware)." },
+          { "action": "Harden access policies", "detail": "Enable sign-in risk detection and session behaviour analytics." },
+          { "action": "Train user and team on safe browser practices", "detail": "Avoid reusing sessions across devices or networks." }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-48",
+    "title": "Persistence via Cloud Workload Implants",
+    "category": "Cloud Security",
+    "severity": "High",
+    "scenario": "An attacker gains initial access to a cloud environment and implants persistent code into serverless services (e.g., AWS Lambda, Azure Functions, GCP Cloud Functions). These implants may execute commands, beacon outbound, exfiltrate data or re-establish access.",
+    "detection": "Cloud Audit Logs, CSPM, SIEM, EDR (cloud agent), Source Code Repo Logs.",
+    "mitre": "T1059 (Command and Scripting Interpreter), T1546.008 (Implant in Startup Items or Scheduled Tasks), T1203 (Exploitation for Client Execution – cloud variant).",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enforce IaC (Infrastructure as Code) deployment", "detail": "All functions must originate from source controlled templates." },
+          { "action": "Enable audit logging for all serverless activities", "detail": "CloudTrail (AWS), Activity Logs (Azure), Audit Logs (GCP)." },
+          { "action": "Implement strict IAM roles", "detail": "Least privilege for function creation and modification." }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Unusual serverless function created or modified outside CI/CD." },
+          { "action": "Identify function origin", "detail": "Check deployment timestamp, user, role, IP address, source code hash." },
+          { "action": "Analyse function payload", "detail": "Reverse engineered code or configuration, detect obfuscated logic." },
+          { "action": "Review invocation patterns", "detail": "Look for beaconing, data exfiltration, command-and-control behaviour." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Disable or delete the rogue function", "detail": "Immediately stop execution of the implant." },
+          { "action": "Revoke associated IAM roles or keys", "detail": "Limit attacker’s cloud-level permissions." },
+          { "action": "Freeze modification of critical services", "detail": "Temporary read-only lock on affected workloads or regions." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove all unauthorised functions or code", "detail": "Validate each against known CI/CD signatures or hashes." },
+          { "action": "Rotate all keys and tokens used in impacted services", "detail": "Especially if leaked from the implant’s logic." },
+          { "action": "Restore functions from trusted source", "detail": "Redeploy from clean backups or source controlled templates." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Re-enable legitimate functions", "detail": "After validation and review of runtime environment." },
+          { "action": "Resume CI/CD operations with integrity checks", "detail": "Require code signing or integrity monitoring on future deployments." },
+          { "action": "Monitor invocation metrics", "detail": "Validate against baseline behaviour for anomalies post-restoration." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Identify how the attacker implanted the function (API keys, console access, CI/CD hijack)." },
+          { "action": "Improve alerting for workload changes", "detail": "Include real-time notifications for serverless deployment actions." },
+          { "action": "Enforce workload access reviews", "detail": "Periodic review of IAM roles and permissions tied to serverless." }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-49",
+    "title": "Command-and-Control via Trusted Third-Party APIs",
+    "category": "Network Security",
+    "severity": "High",
+    "scenario": "An attacker avoids traditional C2 infrastructure by using trusted, widely allowed APIs or platforms (e.g., Slack webhooks, Dropbox uploads, Telegram bots, Google Sheets) to issue commands, exfiltrate data or receive execution results. These communications often blend into normal outbound traffic and are difficult to detect.",
+    "detection": "EDR, NDR, Proxy Logs, SIEM, Threat Intelligence Feeds.",
+    "mitre": "T1102.002 (Web Service: Bidirectional Communication), T1071.001 (Application Layer Protocol: Web Protocols).",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Restrict access to known risky API endpoints", "detail": "Block platforms like Pastebin, Discord, Telegram on corporate networks." },
+          { "action": "Monitor unusual HTTP/HTTPS destinations", "detail": "Especially to API subdomains or known C2-abused services." },
+          { "action": "Build behavioural baselines", "detail": "For normal use of cloud-based APIs (e.g., Slack, Google Drive)." }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Endpoint reaching out to non-corporate API services at odd hours or with beacon-like patterns." },
+          { "action": "Investigate destination", "detail": "Identify service (e.g., Dropbox API, Telegram bot domain), check domain reputation." },
+          { "action": "Review payload and traffic size", "detail": "Look for repetitive patterns, encoded content or timed intervals." },
+          { "action": "Inspect EDR logs", "detail": "Identify parent processes that initiated connections to API endpoints." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Block outbound access to the abused API endpoint", "detail": "Via proxy, firewall or DNS sinkhole." },
+          { "action": "Isolate infected host(s)", "detail": "Stop ongoing C2 activity and lateral movement attempts." },
+          { "action": "Revoke API tokens or keys if attacker used a legitimate service", "detail": "E.g., Slack tokens, Telegram bot tokens." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Remove malware or scripts leveraging APIs", "detail": "Use EDR to detect persistence mechanisms (e.g., autoruns, scheduled tasks)." },
+          { "action": "Hunt for similar connections across fleet", "detail": "Search by domain, port, user-agent and IP." },
+          { "action": "Inspect for data exfiltration", "detail": "Review upload activity to services like Dropbox, Google Drive, etc." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore endpoint functionality", "detail": "After full malware clean-up and monitoring enablement." },
+          { "action": "Validate outbound traffic", "detail": "Confirm no further attempts to contact similar services." },
+          { "action": "Reinforce perimeter control", "detail": "Add abused domains to blocked lists or risky API usage policies." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "How the API-based C2 was established and persisted." },
+          { "action": "Update network and SIEM detection rules", "detail": "For API-based command delivery patterns and obfuscated traffic." },
+          { "action": "Enforce least privilege on allowed apps", "detail": "Whitelist only business-critical API services." }
+        ]
+      }
+    ]
+  },
+  {
+    "playbookId": "PB-50",
+    "title": "Privilege Escalation Through SaaS Misconfigurations",
+    "category": "Cloud Security",
+    "severity": "High",
+    "scenario": "An attacker or insider exploits misconfigured SaaS application settings, such as over permissioned third-party apps, improperly delegated admin rights or overly broad sharing policies, to gain unauthorised access or escalate privileges to sensitive data and functions.",
+    "detection": "SaaS Security Tools (SSPM/CSPM), SIEM, Identity Logs, CASB, Admin Audit Logs.",
+    "mitre": "T1068 (Exploitation for Privilege Escalation), T1078.004 (Valid Accounts: Cloud), T1548.003 (Abuse Elevation Control Mechanism: Sudo and Admin Roles).",
+    "phases": [
+      {
+        "phase": "1. Preparation (Pre-Incident Setup)",
+        "steps": [
+          { "action": "Enforce least-privilege model", "detail": "Limit SaaS admin roles strictly to required personnel." },
+          { "action": "Conduct periodic access reviews", "detail": "Especially on third-party app permissions and delegated roles." },
+          { "action": "Monitor SaaS configurations continuously", "detail": "Use SSPM or CASB tools with drift detection." }
+        ]
+      },
+      {
+        "phase": "2. Detection & Analysis",
+        "steps": [
+          { "action": "Alert triggered", "detail": "Unexpected admin role granted, third-party app with excessive scopes approved." },
+          { "action": "Investigate actor", "detail": "Validate the user or app that received new privileges." },
+          { "action": "Review audit logs", "detail": "Focus on who assigned roles, when, from where and what privileges were escalated." }
+        ]
+      },
+      {
+        "phase": "3. Containment",
+        "steps": [
+          { "action": "Revoke elevated roles or app permissions", "detail": "Remove Global Admin, API tokens or excessive OAuth scopes." },
+          { "action": "Suspend suspicious user/app account", "detail": "If found to be malicious or unauthorised." },
+          { "action": "Block external access if needed", "detail": "Based on IP, location or app signature." }
+        ]
+      },
+      {
+        "phase": "4. Eradication",
+        "steps": [
+          { "action": "Reset affected configurations", "detail": "Restore default roles, disable risky sharing or integrations." },
+          { "action": "Audit for persistent access vectors", "detail": "Such as app registration, service accounts or API keys left behind." },
+          { "action": "Rebuild compromised credentials or services", "detail": "Rotate affected admin accounts or apps." }
+        ]
+      },
+      {
+        "phase": "5. Recovery",
+        "steps": [
+          { "action": "Restore legitimate access only", "detail": "After re-certification of user roles and app scopes." },
+          { "action": "Monitor high-privilege actions", "detail": "Temporarily increase alerting for admin activity logs." },
+          { "action": "Re-enable suspended users/app if validated", "detail": "Under revised security policies." }
+        ]
+      },
+      {
+        "phase": "6. Lessons Learned & Reporting",
+        "steps": [
+          { "action": "Conduct RCA", "detail": "Determine the root of misconfiguration, user error, default settings or poor controls." },
+          { "action": "Review and tighten SaaS admin policies", "detail": "Especially for integrations and shared drives/folders." },
+          { "action": "Update detection rules", "detail": "For unusual role assignments or third-party app grants." }
+        ]
+      }
+    ]
   }
 ]
