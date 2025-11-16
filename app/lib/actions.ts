@@ -1,13 +1,12 @@
 'use server'
 import { prisma } from './db';
-import { auth } from '@/auth';
+import { auth, signOut } from '@/auth'; // <--- Gộp chung vào 1 dòng duy nhất
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 // --- PHẦN 1: PLAYBOOK (Đã bảo mật) ---
 
 export async function getPlaybooks(query: string) {
-  // Ai cũng được xem, không cần check auth
   try {
     return await prisma.playbook.findMany({
       where: {
@@ -29,7 +28,6 @@ export async function getPlaybookById(id: string) {
 }
 
 export async function createPlaybook(formData: FormData) {
-  // 🛡️ BẢO MẬT: Chỉ Admin mới được tạo
   const session = await auth();
   if ((session?.user as any)?.role !== 'ADMIN') throw new Error("Access Denied");
 
@@ -51,7 +49,6 @@ export async function createPlaybook(formData: FormData) {
 }
 
 export async function updatePlaybook(formData: FormData) {
-  // 🛡️ BẢO MẬT: Chỉ Admin mới được sửa
   const session = await auth();
   if ((session?.user as any)?.role !== 'ADMIN') throw new Error("Access Denied");
 
@@ -77,7 +74,6 @@ export async function updatePlaybook(formData: FormData) {
 // --- PHẦN 2: USER MANAGEMENT (Mới) ---
 
 export async function getUsers() {
-  // Chỉ Admin mới xem được danh sách
   const session = await auth();
   if ((session?.user as any)?.role !== 'ADMIN') return [];
 
@@ -108,4 +104,9 @@ export async function deleteUser(formData: FormData) {
     where: { id: parseInt(formData.get('userId') as string) }
   });
   revalidatePath('/admin/users');
+}
+
+// --- PHẦN 3: ĐĂNG XUẤT ---
+export async function handleSignOut() {
+  await signOut();
 }

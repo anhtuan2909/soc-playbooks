@@ -2,17 +2,18 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Search, Shield, AlertTriangle, PlusCircle } from 'lucide-react';
+import { handleSignOut } from '@/app/lib/actions'; // Import hàm đăng xuất
+import { Search, Shield, AlertTriangle, PlusCircle, LogIn, LogOut, Settings } from 'lucide-react';
 
 interface DashboardProps {
   initialPlaybooks: any[];
-  userRole: string; // Nhận thêm quyền hạn từ Server
+  userRole: string;
+  userEmail: string | null; // Nhận thêm Email
 }
 
-export default function DashboardClient({ initialPlaybooks, userRole }: DashboardProps) {
+export default function DashboardClient({ initialPlaybooks, userRole, userEmail }: DashboardProps) {
   const [searchTerm, setSearchTerm] = useState('');
 
-  // Logic lọc dữ liệu ngay lập tức
   const filteredPlaybooks = initialPlaybooks.filter((pb) => {
     const term = searchTerm.toLowerCase();
     return (
@@ -37,18 +38,41 @@ export default function DashboardClient({ initialPlaybooks, userRole }: Dashboar
             <p className="text-slate-400 mt-2 text-sm">Knowledge Base for SOC Team</p>
           </div>
           
-          <div className="flex gap-4 items-end">
-             {/* 🛡️ CHỈ HIỆN NÚT NẾU LÀ ADMIN */}
+          <div className="flex gap-4 items-center">
+             {/* 1. NÚT NEW PLAYBOOK (Chỉ Admin thấy) */}
              {userRole === 'ADMIN' && (
-               <Link href="/playbook/new" className="flex items-center gap-2 bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-bold transition shadow-md border border-green-600">
-                  <PlusCircle size={20}/> New Playbook
-               </Link>
+               <>
+                 <Link href="/admin/users" className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-lg font-medium transition border border-slate-700" title="Quản lý nhân sự">
+                    <Settings size={18}/> Users
+                 </Link>
+                 <Link href="/playbook/new" className="flex items-center gap-2 bg-green-700 hover:bg-green-600 text-white px-4 py-2 rounded-lg font-bold transition shadow-md border border-green-600">
+                    <PlusCircle size={18}/> New Playbook
+                 </Link>
+               </>
              )}
              
-             <div className="bg-slate-900 px-4 py-2 rounded border border-slate-800 text-center min-w-[100px]">
-                <span className="block text-xl font-bold text-white">{filteredPlaybooks.length}</span>
-                <span className="text-[10px] text-slate-500 uppercase">Visible</span>
-             </div>
+             {/* 2. KHU VỰC TÀI KHOẢN */}
+             <div className="h-8 w-[1px] bg-slate-700 mx-2"></div> {/* Đường kẻ dọc */}
+
+             {userEmail ? (
+               // Nếu ĐÃ đăng nhập
+               <div className="flex items-center gap-3">
+                 <div className="text-right hidden md:block">
+                   <div className="text-sm text-white font-medium">{userEmail}</div>
+                   <div className="text-xs text-slate-500 uppercase">{userRole}</div>
+                 </div>
+                 <form action={handleSignOut}>
+                   <button className="flex items-center gap-2 bg-red-900/30 hover:bg-red-900/50 text-red-400 px-3 py-2 rounded-lg border border-red-900/50 transition" title="Đăng xuất">
+                     <LogOut size={18}/>
+                   </button>
+                 </form>
+               </div>
+             ) : (
+               // Nếu CHƯA đăng nhập (Khách)
+               <Link href="/login" className="flex items-center gap-2 bg-blue-700 hover:bg-blue-600 text-white px-5 py-2 rounded-lg font-bold transition shadow-md">
+                 <LogIn size={18}/> Login
+               </Link>
+             )}
           </div>
         </header>
 
