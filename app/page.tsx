@@ -5,9 +5,16 @@ import { Search, Shield, AlertTriangle } from 'lucide-react';
 // Tắt cache để luôn lấy dữ liệu mới nhất
 export const revalidate = 0; 
 
-export default async function Home({ searchParams }: { searchParams: { q: string } }) {
-  const query = searchParams?.q || '';
+// --- SỬA ĐỔI QUAN TRỌNG CHO NEXT.JS 15 ---
+export default async function Home(props: {
+  searchParams: Promise<{ q?: string }>
+}) {
+  // Phải await searchParams trước khi đọc dữ liệu
+  const searchParams = await props.searchParams;
+  const query = searchParams.q || '';
+  
   const playbooks = await getPlaybooks(query);
+// ------------------------------------------
 
   return (
     <main className="min-h-screen bg-slate-950 text-slate-200 p-6 font-sans">
@@ -44,7 +51,8 @@ export default async function Home({ searchParams }: { searchParams: { q: string
 
         {/* Danh sách Playbook */}
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
-          {playbooks.map((pb) => (
+          {/* Đã có (pb: any) để fix lỗi build TypeScript */}
+          {playbooks.map((pb: any) => (
             <Link key={pb.id} href={`/playbook/${pb.playbookId}`} className="group block h-full">
               <div className="h-full bg-slate-900/50 border border-slate-800 p-6 rounded-xl hover:border-blue-500/50 hover:bg-slate-800 transition flex flex-col">
                 <div className="flex justify-between items-start mb-4">
