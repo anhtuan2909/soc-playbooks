@@ -1,5 +1,8 @@
 'use client';
-import { useChat } from 'ai/react';
+// --- SỬA LỖI Ở ĐÂY: IMPORT TRỰC TIẾP TỪ GÓI LÕI ---
+import { useChat } from '@ai-sdk/react'; 
+// --------------------------------------------------
+
 import { askGemini } from '@/app/lib/actions';
 import { Bot, Send, Loader2, X as CloseIcon } from 'lucide-react';
 import { useState } from 'react';
@@ -7,19 +10,11 @@ import { useState } from 'react';
 export function GeminiChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
   const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
-    
-    // --- ĐÃ SỬA LỖI TẠI ĐÂY ---
-    // 1. Đổi "api" thành "action"
-    // 2. "action" nhận về { messages } thay vì (content)
     async action({ messages }) {
-      // Lấy câu hỏi cuối cùng của người dùng
       const lastMessage = messages[messages.length - 1];
       const content = lastMessage.content;
-      
-      // Gửi câu hỏi cho RAG Backend
       return await askGemini(content);
     }
-    // ----------------------------
   });
 
   if (!isOpen) {
