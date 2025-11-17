@@ -1,21 +1,37 @@
 'use client';
-// --- SỬA LỖI Ở ĐÂY: IMPORT TRỰC TIẾP TỪ GÓI LÕI ---
 import { useChat } from '@ai-sdk/react'; 
-// --------------------------------------------------
-
 import { askGemini } from '@/app/lib/actions';
 import { Bot, Send, Loader2, X as CloseIcon } from 'lucide-react';
 import { useState } from 'react';
 
 export function GeminiChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
-  const { messages, input, handleInputChange, handleSubmit, isLoading } = useChat({
+
+  // --- SỬA LỖI LOGIC TẠI ĐÂY ---
+  // 1. Tự tạo state cho ô input
+  const [input, setInput] = useState('');
+
+  // 2. Chỉ lấy messages, append (để gửi), và isLoading từ useChat
+  const { messages, append, isLoading } = useChat({
     async action({ messages }) {
       const lastMessage = messages[messages.length - 1];
       const content = lastMessage.content;
       return await askGemini(content);
     }
   });
+
+  // 3. Tạo hàm handleSubmit thủ công
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (!input) return;
+    
+    // Gửi message của user (do ta quản lý) vào useChat
+    append({ role: 'user', content: input });
+    
+    // Xóa ô input
+    setInput('');
+  };
+  // --------------------------------
 
   if (!isOpen) {
     return (
@@ -59,11 +75,11 @@ export function GeminiChatWidget() {
         ))}
       </div>
       
-      {/* Khung nhập liệu */}
+      {/* Khung nhập liệu (Dùng state `input` và `setInput`) */}
       <form onSubmit={handleSubmit} className="p-4 border-t border-slate-700 flex gap-2">
         <input
           value={input}
-          onChange={handleInputChange}
+          onChange={(e) => setInput(e.target.value)}
           placeholder="Hỏi AI về playbook..."
           className="flex-1 bg-slate-800 border border-slate-600 rounded-lg p-2 text-white outline-none focus:border-blue-500"
         />
