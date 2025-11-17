@@ -1,4 +1,5 @@
 'use client';
+// Import 'useChat' từ gói lõi
 import { useChat } from '@ai-sdk/react'; 
 import { askGemini } from '@/app/lib/actions';
 import { Bot, Send, Loader2, X as CloseIcon } from 'lucide-react';
@@ -8,28 +9,48 @@ export function GeminiChatWidget() {
   const [isOpen, setIsOpen] = useState(false);
 
   // --- SỬA LỖI LOGIC TẠI ĐÂY ---
-  // 1. Tự tạo state cho ô input
-  const [input, setInput] = useState('');
 
-  // 2. Chỉ lấy messages, append (để gửi), và isLoading từ useChat
-  const { messages, append, isLoading } = useChat({
-    async action({ messages }) {
-      const lastMessage = messages[messages.length - 1];
-      const content = lastMessage.content;
-      return await askGemini(content);
-    }
+  // 1. Chỉ dùng useChat để lấy danh sách messages, setMessages và isLoading
+  const { messages, setMessages, isLoading } = useChat({
+    // Bỏ thuộc tính 'action' đi, chúng ta sẽ gọi thủ công
   });
 
-  // 3. Tạo hàm handleSubmit thủ công
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  // 2. Tự quản lý ô input
+  const [input, setInput] = useState('');
+
+  // 3. Viết hàm Submit thủ công
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!input) return;
+
+    // Lấy nội dung gõ
+    const userMessageContent = input;
     
-    // Gửi message của user (do ta quản lý) vào useChat
-    append({ role: 'user', content: input });
-    
-    // Xóa ô input
+    // Xóa ô input ngay lập tức
     setInput('');
+
+    // (UX) Thêm tin nhắn của User vào danh sách chat ngay
+    setMessages([
+      ...messages,
+      { id: Date.now().toString(), role: 'user', content: userMessageContent }
+    ]);
+
+    // Gọi Server Action (askGemini)
+    try {
+      const aiResponseContent = await askGemini(userMessageContent);
+
+      // Thêm tin nhắn của AI vào danh sách
+      setMessages(prevMessages => [
+        ...prevMessages,
+        { id: Date.now().toString(), role: 'assistant', content: aiResponseContent }
+      ]);
+    } catch (error) {
+      // Xử lý nếu Server Action bị lỗi
+      setMessages(prevMessages => [
+        ...prevMessages,
+        { id: Date.now().toString(), role: 'assistant', content: 'Lỗi: Không thể kết nối tới AI. Vui lòng thử lại.' }
+      ]);
+    }
   };
   // --------------------------------
 
@@ -55,7 +76,7 @@ export function GeminiChatWidget() {
         </button>
       </div>
       
-      {/* Khung chat */}
+      {/* Khung chat (Dùng messages từ useChat) */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         {messages.length === 0 && (
           <div className="text-center text-slate-500 text-sm mt-10">
@@ -75,7 +96,7 @@ export function GeminiChatWidget() {
         ))}
       </div>
       
-      {/* Khung nhập liệu (Dùng state `input` và `setInput`) */}
+      {/* Khung nhập liệu (Dùng state 'input' và 'setInput' thủ công) */}
       <form onSubmit={handleSubmit} className="p-4 border-t border-slate-700 flex gap-2">
         <input
           value={input}
