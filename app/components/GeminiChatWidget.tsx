@@ -25,10 +25,12 @@ export function GeminiChatWidget() {
     if (!input || isLoading) return;
 
     const userMessageContent = input;
+    
+    // Xóa ô input và bật loading
     setInput('');
     setIsLoading(true);
 
-    // Thêm tin nhắn của User
+    // (UX) Thêm tin nhắn của User vào danh sách chat ngay
     setMessages(prevMessages => [
       ...prevMessages,
       { id: Date.now().toString(), role: 'user', content: userMessageContent }
@@ -38,21 +40,19 @@ export function GeminiChatWidget() {
     try {
       const aiResponseContent = await askGemini(userMessageContent);
 
-      // Thêm tin nhắn của AI
+      // Thêm tin nhắn của AI vào danh sách
       setMessages(prevMessages => [
         ...prevMessages,
         { id: Date.now().toString(), role: 'assistant', content: aiResponseContent }
       ]);
     } catch (error) {
-      // --- SỬA LỖI Ở ĐÂY ---
-      // Hiển thị lỗi chi tiết mà Server trả về
-      console.error("Lỗi Frontend:", error); // Ghi log lỗi ra Console trình duyệt
+      // Xử lý nếu Server Action bị lỗi
       setMessages(prevMessages => [
         ...prevMessages,
-        { id: Date.now().toString(), role: 'assistant', content: `Lỗi: ${(error as Error).message}` }
+        { id: Date.now().toString(), role: 'assistant', content: 'Lỗi: Không thể kết nối tới AI. Vui lòng thử lại.' }
       ]);
-      // ----------------------
     } finally {
+      // Tắt loading
       setIsLoading(false);
     }
   };
@@ -105,7 +105,7 @@ export function GeminiChatWidget() {
         <input
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          placeholder="Hỏi AI về playbook....."
+          placeholder="Hỏi AI về playbook..."
           className="flex-1 bg-slate-800 border border-slate-600 rounded-lg p-2 text-white outline-none focus:border-blue-500"
         />
         <button disabled={isLoading} className="bg-blue-600 text-white p-2 rounded-lg disabled:bg-slate-600">
