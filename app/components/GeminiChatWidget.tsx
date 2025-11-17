@@ -1,5 +1,5 @@
 'use client';
-// Import 'useChat' từ gói lõi
+
 import { useChat } from '@ai-sdk/react'; 
 import { askGemini } from '@/app/lib/actions';
 import { Bot, Send, Loader2, X as CloseIcon } from 'lucide-react';
