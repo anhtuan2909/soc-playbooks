@@ -6,9 +6,6 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { AuthError } from 'next-auth';
 
-// --- KHÔNG CẦN IMPORT SDK CỦA GEMINI NỮA ---
-// import { GoogleGenerativeAI } from '@google/generative-ai';
-
 // --- PHẦN 1 & 2: PLAYBOOK (Giữ nguyên) ---
 export async function getPlaybooks(query: string) {
   const session = await auth();
