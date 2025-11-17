@@ -1,12 +1,14 @@
 'use server'
 
 import { prisma } from './db';
-import { auth, signOut, signIn } from '@/auth'; 
+import { auth, signOut, signIn } from '@/auth'; // Auth imports
+import { GoogleGenerativeAI } from '@google/generative-ai'; // AI Import (Chỉ 1 lần ở đây)
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { AuthError } from 'next-auth';
-// --- TÍCH HỢP AI (RAG) ---
-import { GoogleGenerativeAI } from '@google/generative-ai';
+
+// --- Khởi tạo AI 1 lần ---
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 // --- PHẦN 1: PLAYBOOK (Đọc dữ liệu - Đã thêm khóa bảo mật) ---
 
@@ -151,10 +153,7 @@ export async function authenticate(formData: FormData) {
 }
 
 // --- PHẦN 5: AI INTEGRATION (Bản có Log lỗi chi tiết) ---
-import { GoogleGenerativeAI } from '@google/generative-ai';
-
-// Khởi tạo 1 lần
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+// (Đã xóa import trùng lặp ở đây)
 
 export async function askGemini(question: string) {
   'use server'; 
