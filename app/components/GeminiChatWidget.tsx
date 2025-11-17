@@ -25,12 +25,10 @@ export function GeminiChatWidget() {
     if (!input || isLoading) return;
 
     const userMessageContent = input;
-    
-    // Xóa ô input và bật loading
     setInput('');
     setIsLoading(true);
 
-    // (UX) Thêm tin nhắn của User vào danh sách chat ngay
+    // Thêm tin nhắn của User
     setMessages(prevMessages => [
       ...prevMessages,
       { id: Date.now().toString(), role: 'user', content: userMessageContent }
@@ -40,19 +38,21 @@ export function GeminiChatWidget() {
     try {
       const aiResponseContent = await askGemini(userMessageContent);
 
-      // Thêm tin nhắn của AI vào danh sách
+      // Thêm tin nhắn của AI
       setMessages(prevMessages => [
         ...prevMessages,
         { id: Date.now().toString(), role: 'assistant', content: aiResponseContent }
       ]);
     } catch (error) {
-      // Xử lý nếu Server Action bị lỗi
+      // --- SỬA LỖI Ở ĐÂY ---
+      // Hiển thị lỗi chi tiết mà Server trả về
+      console.error("Lỗi Frontend:", error); // Ghi log lỗi ra Console trình duyệt
       setMessages(prevMessages => [
         ...prevMessages,
-        { id: Date.now().toString(), role: 'assistant', content: 'Lỗi: Không thể kết nối tới AI. Vui lòng thử lại.' }
+        { id: Date.now().toString(), role: 'assistant', content: `Lỗi: ${(error as Error).message}` }
       ]);
+      // ----------------------
     } finally {
-      // Tắt loading
       setIsLoading(false);
     }
   };

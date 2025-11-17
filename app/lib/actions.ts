@@ -150,45 +150,63 @@ export async function authenticate(formData: FormData) {
   }
 }
 
+// --- PHẦN 5: AI INTEGRATION (Bản có Log lỗi chi tiết) ---
+import { GoogleGenerativeAI } from '@google/generative-ai';
+
+// Khởi tạo 1 lần
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
 
 export async function askGemini(question: string) {
-  'use server'; // Đảm bảo hàm này chỉ chạy ở Server
+  'use server'; 
 
-  // 1. Khởi tạo model
-  const embedModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
-  const chatModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+  // 1. Kiểm tra Key ngay lập tức
+  if (!process.env.GEMINI_API_KEY) {
+    console.error("Vercel Lỗi: Không tìm thấy GEMINI_API_KEY.");
+    throw new Error("Lỗi cấu hình: Thiếu API Key.");
+  }
 
-  // 2. Nhúng câu hỏi của người dùng (Biến câu hỏi thành vector)
-  const questionEmbedding = (await embedModel.embedContent(question)).embedding.values;
-  const vectorString = `[${questionEmbedding.join(',')}]`;
+  try {
+    console.log("AI Action: Bắt đầu xử lý câu hỏi...");
+    // 2. Khởi tạo model
+    const embedModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
+    const chatModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 
-  // 3. Tìm 3 Playbook liên quan nhất trong DB (Dùng SQL thô)
-  const relevantDocs: any[] = await prisma.$queryRaw`
-    SELECT "content"
-    FROM "PlaybookEmbedding"
-    ORDER BY "embedding" <-> (${vectorString}::vector)
-    LIMIT 3; 
-  `;
-  
-  const context = relevantDocs.map(doc => doc.content).join("\n\n---\n\n");
+    // 3. Nhúng câu hỏi
+    console.log("AI Action: Đang nhúng câu hỏi...");
+    const questionEmbedding = (await embedModel.embedContent(question)).embedding.values;
+    const vectorString = `[${questionEmbedding.join(',')}]`;
+    console.log("AI Action: Nhúng câu hỏi thành công.");
 
-  // 4. Tạo Prompt (Mệnh lệnh) cho Gemini
-  const prompt = `
-    Bạn là một Trợ lý Chuyên gia An ninh SOC (SOC Co-pilot).
-    Nhiệm vụ của bạn là trả lời câu hỏi của Analyst CHỈ DỰA VÀO thông tin trong các Playbook được cung cấp.
-    Nếu không tìm thấy thông tin trong context, hãy nói "Tôi không tìm thấy thông tin này trong Playbook."
+    // 4. Tìm kiếm Database
+    console.log("AI Action: Đang tìm kiếm vector...");
+    const relevantDocs: any[] = await prisma.$queryRaw`
+      SELECT "content"
+      FROM "PlaybookEmbedding"
+      ORDER BY "embedding" <-> (${vectorString}::vector)
+      LIMIT 3; 
+    `;
+    console.log(`AI Action: Tìm thấy ${relevantDocs.length} tài liệu liên quan.`);
     
-    CONTEXT (Nội dung Playbook liên quan):
-    ${context}
-    
-    ---
-    QUESTION (Câu hỏi của Analyst): ${question}
-    
-    ANSWER (Trả lời bằng Tiếng Việt):
-  `;
+    const context = relevantDocs.map(doc => doc.content).join("\n\n---\n\n");
 
-  // 5. Gọi Gemini trả lời
-  const result = await chatModel.generateContent(prompt);
-  return result.response.text();
+    // 5. Tạo Prompt
+    const prompt = `
+      CONTEXT: ${context}
+      QUESTION: ${question}
+      INSTRUCTION: Dựa CHỈ vào Context, trả lời câu hỏi bằng Tiếng Việt. Nếu không tìm thấy, nói "Tôi không tìm thấy thông tin này trong Playbook."
+    `;
+
+    // 6. Gọi Gemini trả lời
+    console.log("AI Action: Đang gọi Gemini...");
+    const result = await chatModel.generateContent(prompt);
+    console.log("AI Action: Gemini trả lời thành công.");
+    return result.response.text();
+
+  } catch (error) {
+    // 7. GHI LẠI LỖI CHI TIẾT (Đây là mấu chốt)
+    console.error("LỖI TẠI HÀM ASK_GEMINI:", error); 
+    
+    // Ném lỗi này ra Giao diện
+    throw new Error("Lỗi Server: " + (error as Error).message);
+  }
 }
