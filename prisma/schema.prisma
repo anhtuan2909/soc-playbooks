@@ -35,3 +35,14 @@ model User {
   role      String   @default("VIEWER") // "ADMIN" hoặc "VIEWER"
   createdAt DateTime @default(now())
 }
+// ... (Model Playbook và User giữ nguyên) ...
+
+// BẢNG MỚI: DÙNG ĐỂ AI TÌM KIẾM
+model PlaybookEmbedding {
+  id         Int      @id @default(autoincrement())
+  playbookId String   @unique // Liên kết với PB-01, PB-02...
+  content    String   // Nội dung text của playbook
+  embedding  Unsupported("vector(768)") // Vector 768 chiều của Gemini
+
+  // DÒNG NÀY ĐÃ BỊ XÓA (@@index...)
+}
