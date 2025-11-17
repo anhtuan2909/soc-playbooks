@@ -1,22 +1,18 @@
 'use server'
 
 import { prisma } from './db';
-import { auth, signOut, signIn } from '@/auth'; // Auth imports
-import { GoogleGenerativeAI } from '@google/generative-ai'; // AI Import (Chỉ 1 lần ở đây)
+import { auth, signOut, signIn } from '@/auth'; 
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { AuthError } from 'next-auth';
 
-// --- Khởi tạo AI 1 lần ---
-const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+// --- KHÔNG CẦN IMPORT SDK CỦA GEMINI NỮA ---
+// import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// --- PHẦN 1: PLAYBOOK (Đọc dữ liệu - Đã thêm khóa bảo mật) ---
-
+// --- PHẦN 1 & 2: PLAYBOOK (Giữ nguyên) ---
 export async function getPlaybooks(query: string) {
-  // 🛡️ CHỐT CHẶN 1: Phải đăng nhập mới được lấy danh sách
   const session = await auth();
   if (!session || !session.user) return []; 
-
   try {
     return await prisma.playbook.findMany({
       where: {
@@ -34,10 +30,8 @@ export async function getPlaybooks(query: string) {
 }
 
 export async function getPlaybookById(id: string) {
-  // 🛡️ CHỐT CHẶN 2: Phải đăng nhập mới xem được chi tiết
   const session = await auth();
   if (!session || !session.user) return null;
-
   try {
     return await prisma.playbook.findUnique({ 
         where: { playbookId: id } 
@@ -45,12 +39,10 @@ export async function getPlaybookById(id: string) {
   } catch (error) { return null; }
 }
 
-// --- PHẦN 2: PLAYBOOK (Ghi dữ liệu - Chỉ Admin) ---
-
+// --- PHẦN 2, 3, 4: CRUD VÀ AUTH (Giữ nguyên) ---
 export async function createPlaybook(formData: FormData) {
   const session = await auth();
   if ((session?.user as any)?.role !== 'ADMIN') throw new Error("Access Denied");
-
   const phasesRaw = formData.get('phases') as string;
   await prisma.playbook.create({
     data: {
@@ -71,10 +63,8 @@ export async function createPlaybook(formData: FormData) {
 export async function updatePlaybook(formData: FormData) {
   const session = await auth();
   if ((session?.user as any)?.role !== 'ADMIN') throw new Error("Access Denied");
-
   const id = formData.get('playbookId') as string;
   const phasesRaw = formData.get('phases') as string;
-
   await prisma.playbook.update({
     where: { playbookId: id },
     data: {
@@ -91,12 +81,9 @@ export async function updatePlaybook(formData: FormData) {
   redirect(`/playbook/${id}`);
 }
 
-// --- PHẦN 3: USER MANAGEMENT (Quản lý nhân sự) ---
-
 export async function getUsers() {
   const session = await auth();
   if ((session?.user as any)?.role !== 'ADMIN') return [];
-
   return await prisma.user.findMany({
     orderBy: { createdAt: 'desc' }
   });
@@ -105,7 +92,6 @@ export async function getUsers() {
 export async function createUser(formData: FormData) {
   const session = await auth();
   if ((session?.user as any)?.role !== 'ADMIN') return;
-
   await prisma.user.create({
     data: {
       email: formData.get('email') as string,
@@ -119,14 +105,11 @@ export async function createUser(formData: FormData) {
 export async function deleteUser(formData: FormData) {
   const session = await auth();
   if ((session?.user as any)?.role !== 'ADMIN') return;
-
   await prisma.user.delete({
     where: { id: parseInt(formData.get('userId') as string) }
   });
   revalidatePath('/admin/users');
 }
-
-// --- PHẦN 4: AUTHENTICATION (Xử lý Đăng nhập/Đăng xuất) ---
 
 export async function handleSignOut() {
   await signOut();
@@ -152,59 +135,97 @@ export async function authenticate(formData: FormData) {
   }
 }
 
-// --- PHẦN 5: AI INTEGRATION (Bản có Log lỗi chi tiết) ---
-
+// --- PHẦN 5: AI INTEGRATION (Bản REST API - ĐÃ SỬA LỖI) ---
 export async function askGemini(question: string) {
-  'use server'; 
+  'use server';
 
-  // 1. Kiểm tra Key ngay lập tức
   if (!process.env.GEMINI_API_KEY) {
     console.error("Vercel Lỗi: Không tìm thấy GEMINI_API_KEY.");
     throw new Error("Lỗi cấu hình: Thiếu API Key.");
   }
 
   try {
-    console.log("AI Action: Bắt đầu xử lý câu hỏi...");
-    // 2. Khởi tạo model
-    const embedModel = genAI.getGenerativeModel({ model: "text-embedding-004" });
-    const chatModel = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
+    console.log("AI Action (REST): Bắt đầu xử lý...");
+    
+    // 1) Tạo embedding bằng API REST (ĐÃ SỬA LỖI BODY)
+    const embedRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        // SỬA Ở ĐÂY: Gemini REST API cần 'content' object, không phải 'input'
+        body: JSON.stringify({ 
+          "content": {
+            "parts": [{ "text": question }]
+          }
+        })
+      }
+    );
 
-    // 3. Nhúng câu hỏi
-    console.log("AI Action: Đang nhúng câu hỏi...");
-    const questionEmbedding = (await embedModel.embedContent(question)).embedding.values;
-    const vectorString = `[${questionEmbedding.join(',')}]`;
-    console.log("AI Action: Nhúng câu hỏi thành công.");
+    if (!embedRes.ok) {
+      const errorBody = await embedRes.json();
+      console.error("Lỗi khi tạo Embedding:", errorBody);
+      throw new Error(`Embedding API Error: ${embedRes.statusText}`);
+    }
+    
+    const embedJson = await embedRes.json();
+    const vector = embedJson.embedding?.values;
+    if (!vector) throw new Error("Không tạo được embedding từ API response");
+    console.log("AI Action (REST): Nhúng câu hỏi thành công.");
 
-    // 4. Tìm kiếm Database
-    console.log("AI Action: Đang tìm kiếm vector...");
-    const relevantDocs: any[] = await prisma.$queryRaw`
+    // 2) Chuyển embedding thành vector PG
+    const vectorString = `[${vector.join(",")}]`;
+
+    // 3) Lấy context từ PGVector
+    console.log("AI Action (REST): Đang tìm kiếm vector DB...");
+    const docs: any[] = await prisma.$queryRaw`
       SELECT "content"
       FROM "PlaybookEmbedding"
       ORDER BY "embedding" <-> (${vectorString}::vector)
-      LIMIT 3; 
+      LIMIT 3;
     `;
-    console.log(`AI Action: Tìm thấy ${relevantDocs.length} tài liệu liên quan.`);
+    console.log(`AI Action (REST): Tìm thấy ${docs.length} tài liệu.`);
+    const context = docs.map(d => d.content).join("\n---\n");
+
+    // 4) Gọi Gemini generate answer (REST)
+    console.log("AI Action (REST): Đang gọi Gemini trả lời...");
+    const answerRes = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            { parts: [{ text: `
+CONTEXT:
+${context}
+
+QUESTION:
+${question}
+
+TRẢ LỜI BẰNG TIẾNG VIỆT
+Nếu không có trong Context, trả lời: "Tôi không tìm thấy thông tin trong Playbook."
+            `}] }
+          ]
+        })
+      }
+    );
+
+    if (!answerRes.ok) {
+      const errorBody = await answerRes.json();
+      console.error("Lỗi khi Generate Content:", errorBody);
+      throw new Error(`Generate Content API Error: ${answerRes.statusText}`);
+    }
+
+    const answerJson = await answerRes.json();
+    const text = answerJson.candidates?.[0]?.content?.parts?.[0]?.text;
+    if (!text) throw new Error("Không nhận được nội dung trả lời từ AI.");
     
-    const context = relevantDocs.map(doc => doc.content).join("\n\n---\n\n");
+    console.log("AI Action (REST): Gemini trả lời thành công.");
+    return text;
 
-    // 5. Tạo Prompt
-    const prompt = `
-      CONTEXT: ${context}
-      QUESTION: ${question}
-      INSTRUCTION: Dựa CHỈ vào Context, trả lời câu hỏi bằng Tiếng Việt. Nếu không tìm thấy, nói "Tôi không tìm thấy thông tin này trong Playbook."
-    `;
-
-    // 6. Gọi Gemini trả lời
-    console.log("AI Action: Đang gọi Gemini...");
-    const result = await chatModel.generateContent(prompt);
-    console.log("AI Action: Gemini trả lời thành công.");
-    return result.response.text();
-
-  } catch (error) {
-    // 7. GHI LẠI LỖI CHI TIẾT (Đây là mấu chốt)
-    console.error("LỖI TẠI HÀM ASK_GEMINI:", error); 
-    
-    // Ném lỗi này ra Giao diện
-    throw new Error("Lỗi Server: " + (error as Error).message);
+  } catch (err) {
+    console.error("LỖI TẠI HÀM ASK_GEMINI (REST):", err);
+    throw new Error("Server Error: " + (err as Error).message);
   }
 }
