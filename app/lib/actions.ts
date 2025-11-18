@@ -7,7 +7,6 @@ import { redirect } from 'next/navigation';
 import { AuthError } from 'next-auth';
 
 // --- KHÔNG CẦN IMPORT SDK CỦA GEMINI NỮA ---
-// (Vì chúng ta dùng REST API)
 
 // --- PHẦN 1 & 2: PLAYBOOK (Giữ nguyên) ---
 export async function getPlaybooks(query: string) {
@@ -135,7 +134,7 @@ export async function authenticate(formData: FormData) {
   }
 }
 
-// --- PHẦN 5: AI INTEGRATION (Bản REST API - Đã Sửa Lỗi Model Name) ---
+// --- PHẦN 5: AI INTEGRATION (Bản REST API - Đã sửa lỗi Model Name và API Version) ---
 export async function askGemini(question: string) {
   'use server';
 
@@ -147,50 +146,37 @@ export async function askGemini(question: string) {
   try {
     console.log("AI Action (REST): Bắt đầu xử lý...");
     
-    // 1) Tạo embedding bằng API REST
+    // 1) Tạo embedding (Dùng v1beta và model embedding-004 là ĐÚNG)
     const embedRes = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          "content": {
-            "parts": [{ "text": question }]
-          }
-        })
+        body: JSON.stringify({ "content": { "parts": [{ "text": question }] } })
       }
     );
-
-    if (!embedRes.ok) {
-      const errorBody = await embedRes.json();
-      console.error("Lỗi khi tạo Embedding:", errorBody);
-      throw new Error(`Embedding API Error: ${embedRes.statusText}`);
-    }
-    
+    if (!embedRes.ok) throw new Error("Embedding API Error");
     const embedJson = await embedRes.json();
     const vector = embedJson.embedding?.values;
-    if (!vector) throw new Error("Không tạo được embedding từ API response");
-    console.log("AI Action (REST): Nhúng câu hỏi thành công.");
+    if (!vector) throw new Error("Không tạo được embedding");
 
     // 2) Chuyển embedding thành vector PG
     const vectorString = `[${vector.join(",")}]`;
 
     // 3) Lấy context từ PGVector
-    console.log("AI Action (REST): Đang tìm kiếm vector DB...");
     const docs: any[] = await prisma.$queryRaw`
       SELECT "content"
       FROM "PlaybookEmbedding"
       ORDER BY "embedding" <-> (${vectorString}::vector)
       LIMIT 3;
     `;
-    console.log(`AI Action (REST): Tìm thấy ${docs.length} tài liệu.`);
     const context = docs.map(d => d.content).join("\n---\n");
 
     // 4) Gọi Gemini generate answer (REST)
     console.log("AI Action (REST): Đang gọi Gemini trả lời...");
     const answerRes = await fetch(
-      // --- SỬA LỖI Ở ĐÂY: Đổi "gemini-1.5-pro-latest" thành "gemini-1.5-flash-001" ---
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      // --- SỬA LỖI Ở ĐÂY: Dùng endpoint v1 và model gemini-pro ---
+      `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
