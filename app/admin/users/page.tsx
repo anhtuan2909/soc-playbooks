@@ -41,12 +41,18 @@ export default async function UserManagement() {
                 </div>
                 <div>
                     <label className="block text-sm text-slate-400 mb-1">Mật khẩu</label>
-                    <input name="password" type="text" required className="w-full bg-slate-950 border border-slate-700 rounded p-3 text-white outline-none focus:border-blue-500"/>
+                    {/* --- ĐÃ SỬA LỖI BẢO MẬT TẠI ĐÂY --- */}
+                    <input 
+                      name="password" 
+                      type="password" 
+                      required 
+                      className="w-full bg-slate-950 border border-slate-700 rounded p-3 text-white outline-none focus:border-blue-500" 
+                      autoComplete="new-password"
+                    />
                 </div>
                 <div>
                     <label className="block text-sm text-slate-400 mb-1">Vai trò</label>
                     <select name="role" className="w-full bg-slate-950 border border-slate-700 rounded p-3 text-white outline-none focus:border-blue-500">
-                        {/* --- ĐÃ THÊM OPTION GUEST Ở ĐÂY --- */}
                         <option value="GUEST">Guest (Chỉ xem list)</option>
                         <option value="VIEWER">Viewer (Xem chi tiết)</option>
                         <option value="ADMIN">Admin (Toàn quyền)</option>
@@ -74,7 +80,6 @@ export default async function UserManagement() {
                             <tr key={user.id} className="hover:bg-slate-800/50">
                                 <td className="p-4 font-medium text-white">{user.email}</td>
                                 <td className="p-4">
-                                    {/* Logic màu sắc cho từng Role */}
                                     <span className={`px-2 py-1 rounded text-xs font-bold 
                                       ${user.role === 'ADMIN' ? 'bg-blue-900 text-blue-300' : 
                                         user.role === 'GUEST' ? 'bg-yellow-900/50 text-yellow-500' : 
