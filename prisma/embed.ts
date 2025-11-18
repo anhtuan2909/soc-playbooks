@@ -11,7 +11,7 @@ async function main() {
   console.log('🚀 Bắt đầu nhúng (embedding) 50 Playbook...');
   
   const model = genAI.getGenerativeModel({ model: "models/text-embedding-004" });
-  const playbooks = await prisma.playbook.findMany();
+  const playbooks = await prisma.playbook.findMany(); // Lấy 50 playbook từ DB chính
 
   // TẠO MỘT MẢNG CHỨA CÁC LỜI HỨA (PROMISES)
   const embeddingPromises = [];
@@ -37,7 +37,7 @@ async function main() {
         const embedding = result.embedding.values;
         const vectorString = `[${embedding.join(',')}]`;
 
-        // 4. Ghi vào DB
+        // 4. Ghi vào "Bộ não" AI (Bảng Embedding)
         await prisma.$executeRaw`
           INSERT INTO "PlaybookEmbedding" ("playbookId", "content", "embedding")
           VALUES (${pb.playbookId}, ${content}, ${vectorString}::vector)
@@ -48,7 +48,7 @@ async function main() {
       } catch (error: any) {
         console.error(`Lỗi khi nhúng ${pb.playbookId}: ${error.message}`);
       }
-      // Chờ 1 giây để tránh Rate Limit của Google
+      // Chờ 1 giây để tránh Rate Limit của Google (Rất quan trọng)
       await delay(1000); 
     });
   }
