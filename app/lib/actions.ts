@@ -5,8 +5,16 @@ import { auth, signOut, signIn } from '@/auth';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { AuthError } from 'next-auth';
+// Import SDK của Gemini
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// --- KHÔNG CẦN IMPORT SDK CỦA GEMINI NỮA ---
+// --- Khởi tạo AI 1 lần ---
+let genAI: GoogleGenerativeAI;
+if (process.env.GEMINI_API_KEY) {
+  genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+} else {
+  console.error("Vercel Lỗi nghiêm trọng: Biến môi trường GEMINI_API_KEY không được tìm thấy.");
+}
 
 // --- PHẦN 1 & 2: PLAYBOOK (Giữ nguyên) ---
 export async function getPlaybooks(query: string) {
@@ -134,84 +142,53 @@ export async function authenticate(formData: FormData) {
   }
 }
 
-// --- PHẦN 5: AI INTEGRATION (Bản REST API - Đã sửa lỗi Model Name và API Version) ---
+// --- PHẦN 5: AI INTEGRATION (Bản SDK - Đã Sửa Lỗi Tên Model) ---
 export async function askGemini(question: string) {
-  'use server';
+  'use server'; 
 
-  if (!process.env.GEMINI_API_KEY) {
+  if (!process.env.GEMINI_API_KEY || !genAI) {
     console.error("Vercel Lỗi: Không tìm thấy GEMINI_API_KEY.");
     throw new Error("Lỗi cấu hình: Thiếu API Key.");
   }
 
   try {
-    console.log("AI Action (REST): Bắt đầu xử lý...");
+    console.log("AI Action (SDK): Bắt đầu xử lý...");
     
-    // 1) Tạo embedding (Dùng v1beta và model embedding-004 là ĐÚNG)
-    const embedRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ "content": { "parts": [{ "text": question }] } })
-      }
-    );
-    if (!embedRes.ok) throw new Error("Embedding API Error");
-    const embedJson = await embedRes.json();
-    const vector = embedJson.embedding?.values;
-    if (!vector) throw new Error("Không tạo được embedding");
+    // 1. Khởi tạo Model (DÙNG TÊN CHUẨN TỪ JSON CỦA ANH)
+    const embedModel = genAI.getGenerativeModel({ model: "models/text-embedding-004" });
+    const chatModel = genAI.getGenerativeModel({ model: "models/gemini-2.5-flash" }); // <--- SỬA LỖI Ở ĐÂY
 
-    // 2) Chuyển embedding thành vector PG
-    const vectorString = `[${vector.join(",")}]`;
+    // 2. Nhúng câu hỏi
+    console.log("AI Action (SDK): Đang nhúng câu hỏi...");
+    const questionEmbedding = (await embedModel.embedContent(question)).embedding.values;
+    const vectorString = `[${questionEmbedding.join(',')}]`;
 
-    // 3) Lấy context từ PGVector
-    const docs: any[] = await prisma.$queryRaw`
+    // 3. Tìm kiếm Database
+    console.log("AI Action (SDK): Đang tìm kiếm vector DB...");
+    const relevantDocs: any[] = await prisma.$queryRaw`
       SELECT "content"
       FROM "PlaybookEmbedding"
       ORDER BY "embedding" <-> (${vectorString}::vector)
-      LIMIT 3;
+      LIMIT 3; 
     `;
-    const context = docs.map(d => d.content).join("\n---\n");
+    const context = relevantDocs.map(doc => doc.content).join("\n\n---\n\n");
+    console.log(`AI Action (SDK): Tìm thấy ${relevantDocs.length} tài liệu.`);
 
-    // 4) Gọi Gemini generate answer (REST)
-    console.log("AI Action (REST): Đang gọi Gemini trả lời...");
-    const answerRes = await fetch(
-      // --- SỬA LỖI Ở ĐÂY: Dùng endpoint v1 và model gemini-pro ---
-      `https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${process.env.GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            { parts: [{ text: `
-CONTEXT:
-${context}
+    // 4. Tạo Prompt
+    const prompt = `
+      CONTEXT: ${context}
+      QUESTION: ${question}
+      INSTRUCTION: Dựa CHỈ vào Context, trả lời câu hỏi bằng Tiếng Việt. Nếu không tìm thấy, nói "Tôi không tìm thấy thông tin này trong Playbook."
+    `;
 
-QUESTION:
-${question}
+    // 5. Gọi Gemini trả lời
+    console.log("AI Action (SDK): Đang gọi Gemini trả lời...");
+    const result = await chatModel.generateContent(prompt);
+    console.log("AI Action (SDK): Gemini trả lời thành công.");
+    return result.response.text();
 
-TRẢ LỜI BẰNG TIẾNG VIỆT
-Nếu không có trong Context, trả lời: "Tôi không tìm thấy thông tin này trong Playbook."
-            `}] }
-          ]
-        })
-      }
-    );
-
-    if (!answerRes.ok) {
-      const errorBody = await answerRes.json();
-      console.error("Lỗi khi Generate Content:", errorBody);
-      throw new Error(`Generate Content API Error: ${answerRes.statusText}`);
-    }
-
-    const answerJson = await answerRes.json();
-    const text = answerJson.candidates?.[0]?.content?.parts?.[0]?.text;
-    if (!text) throw new Error("Không nhận được nội dung trả lời từ AI.");
-    
-    console.log("AI Action (REST): Gemini trả lời thành công.");
-    return text;
-
-  } catch (err) {
-    console.error("LỖI TẠI HÀM ASK_GEMINI (REST):", err);
-    throw new Error("Server Error: " + (err as Error).message);
+  } catch (error) {
+    console.error("LỖI TẠI HÀM ASK_GEMINI (SDK):", error); 
+    throw new Error("Server Error: " + (error as Error).message);
   }
 }
