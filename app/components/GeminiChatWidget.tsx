@@ -1,10 +1,10 @@
 'use client';
-// KHÔNG DÙNG useChat nữa, dùng React State thủ công.
+// KHÔNG DÙNG useChat nữa, dùng React State thủ công
 import { askGemini } from '@/app/lib/actions';
 import { Bot, Send, Loader2, X as CloseIcon } from 'lucide-react';
 import { useState } from 'react';
 
-// Định nghĩa kiểu dữ liệu cho tin nhắn.
+// Định nghĩa kiểu dữ liệu cho tin nhắn
 interface Message {
   id: string;
   role: 'user' | 'assistant';
