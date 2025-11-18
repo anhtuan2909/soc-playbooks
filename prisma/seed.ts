@@ -15,7 +15,7 @@ async function main() {
     await prisma.playbook.upsert({
       where: { playbookId: pb.playbookId },
       
-      // --- SỬA Ở ĐÂY: CẬP NHẬT DỮ LIỆU KHI ĐÃ TỒN TẠI ---
+      // --- ĐÃ SỬA LỖI Ở ĐÂY: Bắt buộc CẬP NHẬT nội dung mới ---
       update: {
         title: pb.title,
         category: pb.category,
@@ -23,7 +23,7 @@ async function main() {
         scenario: pb.scenario,
         detection: pb.detection,
         mitre: pb.mitre,
-        phases: pb.phases // Quan trọng: Cập nhật JSON các bước
+        phases: pb.phases // Ghi đè JSON 6 bước mới
       },
       // --------------------------------------------------
 
@@ -40,13 +40,11 @@ async function main() {
     })
   }
   
-  // Phần tạo Admin giữ nguyên (đã chuẩn)
+  // Phần tạo Admin giữ nguyên
   const adminEmail = 'admin@soc.local';
   await prisma.user.upsert({
     where: { email: adminEmail },
-																		  
-    update: { password: 'Soc@2025!' },
-	
+    update: { password: 'Soc@2025!' }, // Đảm bảo mật khẩu mới nhất
     create: {
       email: adminEmail,
       password: 'Soc@2025!',
@@ -54,7 +52,7 @@ async function main() {
     }
   });
   
-  console.log('✅ Nap du lieu thanh cong!');
+  console.log('✅ Nap du lieu Playbook va Admin thanh cong!');
 }
 
 main()
