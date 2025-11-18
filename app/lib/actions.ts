@@ -6,6 +6,9 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 import { AuthError } from 'next-auth';
 
+// --- KHÔNG CẦN IMPORT SDK CỦA GEMINI NỮA ---
+// (Vì chúng ta dùng REST API)
+
 // --- PHẦN 1 & 2: PLAYBOOK (Giữ nguyên) ---
 export async function getPlaybooks(query: string) {
   const session = await auth();
@@ -132,7 +135,7 @@ export async function authenticate(formData: FormData) {
   }
 }
 
-// --- PHẦN 5: AI INTEGRATION (Bản REST API - ĐÃ SỬA LỖI) ---
+// --- PHẦN 5: AI INTEGRATION (Bản REST API - Đã sửa lỗi Model Name) ---
 export async function askGemini(question: string) {
   'use server';
 
@@ -144,13 +147,12 @@ export async function askGemini(question: string) {
   try {
     console.log("AI Action (REST): Bắt đầu xử lý...");
     
-    // 1) Tạo embedding bằng API REST (ĐÃ SỬA LỖI BODY)
+    // 1) Tạo embedding bằng API REST (Đã SỬA LỖI BODY)
     const embedRes = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        // SỬA Ở ĐÂY: Gemini REST API cần 'content' object, không phải 'input'
         body: JSON.stringify({ 
           "content": {
             "parts": [{ "text": question }]
@@ -187,7 +189,8 @@ export async function askGemini(question: string) {
     // 4) Gọi Gemini generate answer (REST)
     console.log("AI Action (REST): Đang gọi Gemini trả lời...");
     const answerRes = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      // --- SỬA LỖI Ở ĐÂY: Đổi "gemini-1.5-flash" thành "gemini-pro" ---
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
