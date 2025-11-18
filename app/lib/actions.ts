@@ -135,7 +135,7 @@ export async function authenticate(formData: FormData) {
   }
 }
 
-// --- PHẦN 5: AI INTEGRATION (Bản REST API - Đã Sửa Lỗi) ---
+// --- PHẦN 5: AI INTEGRATION (Bản REST API - Đã Sửa Lỗi Model Name) ---
 export async function askGemini(question: string) {
   'use server';
 
@@ -147,7 +147,7 @@ export async function askGemini(question: string) {
   try {
     console.log("AI Action (REST): Bắt đầu xử lý...");
     
-    // 1) Tạo embedding bằng API REST (SỬA LỖI BODY)
+    // 1) Tạo embedding bằng API REST
     const embedRes = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${process.env.GEMINI_API_KEY}`,
       {
@@ -189,8 +189,8 @@ export async function askGemini(question: string) {
     // 4) Gọi Gemini generate answer (REST)
     console.log("AI Action (REST): Đang gọi Gemini trả lời...");
     const answerRes = await fetch(
-      // --- SỬA LỖI MODEL NAME: Dùng model ổn định nhất ---
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-pro-latest:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      // --- SỬA LỖI Ở ĐÂY: Đổi "gemini-1.5-pro-latest" thành "gemini-1.5-flash-001" ---
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-001:generateContent?key=${process.env.GEMINI_API_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -204,7 +204,7 @@ QUESTION:
 ${question}
 
 TRẢ LỜI BẰNG TIẾNG VIỆT
-Nếu không có trong Context, trả lời: "Tôi không tìm thấy thông tin trong Playbook."
+Nếu không có trong Context, trả lời: "Tôi không tìm thấy thông tin này trong Playbook."
             `}] }
           ]
         })
